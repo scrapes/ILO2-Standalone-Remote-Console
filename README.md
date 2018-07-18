@@ -1,2 +1,2 @@
-# ILO2RemCon
-ILO2 Remote Console as Standalone version
+# ILO2RemoteConsole
+ILO2 Java Remote console as Standalone version
