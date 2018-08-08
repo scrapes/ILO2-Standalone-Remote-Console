@@ -2,20 +2,13 @@ package com.hp.ilo2.remcons;
 
 import java.util.Date;
 
-
-
-
-
-
-
 class Timer
   implements Runnable
 {
-  private static final int STATE_INIT = 0;
-  private static final int STATE_RUNNING = 1;
-  private static final int STATE_PAUSED = 2;
-  private static final int STATE_STOPPED = 3;
-  private int state = 0;
+  enum State {
+    INIT, RUNNING, PAUSED, STOPPED
+  }
+  private State state = State.INIT;
 
   private static final int POLL_PERIOD = 50;
 
@@ -24,165 +17,103 @@ class Timer
   private boolean one_shot;
   private long start_time_millis;
   private long stop_time_millis;
-  private Date date = new Date();
-
-
-
-
 
   private TimerListener callback;
 
-
-
-
-
   private Object callback_info;
 
+  private final Object mutex;
 
-
-
-
-  private Object mutex;
-
-
-
-
-
-  public Timer(int paramInt, boolean paramBoolean, Object paramObject)
+  public Timer(int timeoutMax, boolean isOneShot, Object mutex)
   {
-    this.timeout_max = paramInt;
-    this.one_shot = paramBoolean;
-    this.mutex = paramObject;
+    this.timeout_max = timeoutMax;
+    this.one_shot = isOneShot;
+    this.mutex = mutex;
   }
 
-
-
-
-
-
-
-  public void setListener(TimerListener paramTimerListener, Object paramObject)
+  public void setListener(TimerListener listener, Object callbackInfo)
   {
     synchronized (this.mutex) {
-      this.callback = paramTimerListener;
-      this.callback_info = paramObject;
+      this.callback = listener;
+      this.callback_info = callbackInfo;
     }
   }
-
-
-
-
 
   public void start()
   {
     synchronized (this.mutex) {
       switch (this.state) {
-      case 0:
-        this.state = 1;
-        this.timeout_count = 0;
-        new Thread(this).start();
-        break;
-
-      case 1:
-        this.timeout_count = 0;
-        break;
-
-      case 2:
-        this.timeout_count = 0;
-        this.state = 1;
-        break;
-
-      case 3:
-        this.timeout_count = 0;
-        this.state = 1;
+        case INIT:
+          this.state = State.RUNNING;
+          this.timeout_count = 0;
+          new Thread(this).start();
+          break;
+        case RUNNING:
+          this.timeout_count = 0;
+          break;
+        case PAUSED:
+          this.timeout_count = 0;
+          this.state = State.RUNNING;
+          break;
+        case STOPPED:
+          this.timeout_count = 0;
+          this.state = State.RUNNING;
       }
-
     }
   }
-
-
-
-
 
   public void stop()
   {
     synchronized (this.mutex) {
-      if (this.state != 0) {
-        this.state = 3;
+      if (this.state != State.INIT) {
+        this.state = State.STOPPED;
       }
     }
   }
-
-
-
 
   public void pause()
   {
     synchronized (this.mutex) {
-      if (this.state == 1) {
-        this.state = 2;
+      if (this.state == State.RUNNING) {
+        this.state = State.PAUSED;
       }
     }
   }
-
-
-
-
-
 
   public void cont()
   {
     synchronized (this.mutex) {
-      if (this.state == 2) {
-        this.state = 1;
+      if (this.state == State.PAUSED) {
+        this.state = State.RUNNING;
       }
     }
   }
-
-
-
-
-
-
-
 
   public void run()
   {
-    for (;;)
-    {
-      this.date = new Date();
-      this.start_time_millis = this.date.getTime();
+    do {
+      Date date = new Date();
+      this.start_time_millis = date.getTime();
       try {
-        Thread.sleep(50L);
+        Thread.sleep(POLL_PERIOD);
+      } catch (InterruptedException ignored) {
       }
-      catch (InterruptedException localInterruptedException) {}
 
-      this.date = new Date();
-      this.stop_time_millis = this.date.getTime();
-      if (!process_state()) {
-        break;
-      }
-    }
+      date = new Date();
+      this.stop_time_millis = date.getTime();
+    } while (process_state());
   }
-
-
-
-
-
-
-
-
 
   private boolean process_state()
   {
-    boolean bool = true;
+    boolean shouldStop = true;
 
     synchronized (this.mutex) {
       switch (this.state)
       {
-      case 0:
+      case INIT:
         break;
-      case 1:
+      case PAUSED:
         if (this.stop_time_millis > this.start_time_millis) {
           this.timeout_count = ((int)(this.timeout_count + (this.stop_time_millis - this.start_time_millis)));
         }
@@ -194,28 +125,26 @@ class Timer
             this.callback.timeout(this.callback_info);
           }
           if (this.one_shot) {
-            this.state = 0;
-            bool = false;
+            this.state = State.INIT;
+            shouldStop = false;
           }
           else {
             this.timeout_count = 0;
           }
         }
 
-
         break;
-      case 2:
+      case RUNNING:
         break;
-      case 3:
-        this.state = 0;
-        bool = false;
+      case STOPPED:
+        this.state = State.INIT;
+        shouldStop = false;
       }
 
     }
-    return bool;
+    return shouldStop;
   }
 }
-
 
 /* Location:              C:\Users\anton\Documents\ILO2\rc175p10.jar!\com\hp\ilo2\remcons\Timer.class
  * Java compiler version: 4 (48.0)
