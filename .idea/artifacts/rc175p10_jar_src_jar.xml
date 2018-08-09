@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="rc175p10.jar.src:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/rc175p10_jar_src_jar</output-path>
-    <root id="archive" name="rc175p10.jar.src.jar">
-      <element id="module-output" name="rc175p10.jar.src" />
-    </root>
-  </artifact>
-</component>
