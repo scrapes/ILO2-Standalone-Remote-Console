@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="org.sharegov:mjson:2.0.0-SNAPSHOT" type="repository">
+    <properties include-transitive-deps="false" maven-id="org.sharegov:mjson:2.0.0-SNAPSHOT" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/sharegov/mjson/2.0.0-SNAPSHOT/mjson-2.0.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import com.hp.ilo2.remcons.remcons;
+import mjson.Json;
 import sun.misc.BASE64Encoder;
 
 import java.util.List;
