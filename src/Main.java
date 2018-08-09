@@ -3,7 +3,6 @@
 <param name='param' value='foo'>
 </applet>
 */
-package com.hp.ilo2.remcons;
 
 
 import javax.swing.*;
@@ -16,12 +15,11 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import mjson.Json;
+
+import com.hp.ilo2.remcons.remcons;
 import sun.misc.BASE64Encoder;
 
 import java.util.List;
-
-import java.util.concurrent.TimeUnit;
 
 /*
 
