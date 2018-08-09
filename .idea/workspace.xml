@@ -7,11 +7,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1032a49d-b199-42b1-ac2b-54aaf4689398" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ILO2RemCon.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ILO2RemCon.iml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -24,7 +22,7 @@
     <session id="1667737601">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.7" value="1" />
           <entry key="project.opened" value="1" />
         </counts>
@@ -32,14 +30,14 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="java" value="16" />
-          <entry key="txt" value="193" />
+          <entry key="txt" value="262" />
           <entry key="xml" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="JAVA" value="16" />
-          <entry key="PLAIN_TEXT" value="193" />
+          <entry key="PLAIN_TEXT" value="262" />
           <entry key="XML" value="1" />
         </counts>
       </usages-collector>
@@ -57,6 +55,9 @@
           <entry key="XML" value="1" />
         </counts>
       </usages-collector>
+      <usages-collector id="statistics.spring.boot.run.usages" />
+      <usages-collector id="statistics.js.language.service.starts" />
+      <usages-collector id="statistics.spring.boot.mvc.usages" />
     </session>
   </component>
   <component name="FileEditorManager">
@@ -168,11 +169,10 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-8" />
+  <component name="ProjectFrameBounds">
     <option name="y" value="22" />
-    <option name="width" value="1698" />
-    <option name="height" value="1027" />
+    <option name="width" value="1920" />
+    <option name="height" value="1097" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -225,7 +225,7 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1533809651893" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1533809681080" />
     <property name="ignore_missing_gitignore" value="true" />
     <property name="jdk.selected.JAVA_MODULE" value="1.8" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../mjson-1.4.0.jar!/" />
@@ -361,11 +361,32 @@
       <option name="project" value="LOCAL" />
       <updated>1533809318132</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="refactor to get mJSON via Maven">
+      <created>1533809639399</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1533809639399</updated>
+    </task>
+    <task id="LOCAL-00008" summary="added a generic .gitignore">
+      <created>1533809676099</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1533809676099</updated>
+    </task>
+    <task id="LOCAL-00009" summary="added a generic .gitignore">
+      <created>1533809685928</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1533809685928</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1812000" />
+    <option name="totallyTimeSpent" value="1878000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1920" height="1097" extended-state="6" />
@@ -385,9 +406,9 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Terminal" order="7" sideWeight="0.49840257" weight="0.3299389" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50319487" side_tool="true" visible="true" weight="0.3299389" />
-      <window_info active="true" anchor="bottom" id="Version Control" order="9" sideWeight="0.4968051" visible="true" weight="0.3299389" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="7" sideWeight="0.49733758" visible="true" weight="0.3299389" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.5026624" side_tool="true" visible="true" weight="0.3299389" />
+      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.49627262" weight="0.3299389" />
       <window_info anchor="bottom" id="Messages" order="10" sideWeight="0.49946752" weight="0.3299389" />
       <window_info anchor="bottom" id="Dependency Viewer" order="11" weight="0.32995495" />
       <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
@@ -481,7 +502,8 @@
     <MESSAGE value="IDEA: add module file" />
     <MESSAGE value="IDEA: clean up project files" />
     <MESSAGE value="refactor to get mJSON via Maven" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor to get mJSON via Maven" />
+    <MESSAGE value="added a generic .gitignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="added a generic .gitignore" />
   </component>
   <component name="editorHistoryManager">
     <entry file="jar://C:/Program Files (x86)/Java/jdk1.7.0_71/jre/lib/rt.jar!/java/applet/Applet.class" />
