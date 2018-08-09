@@ -20,3 +20,7 @@
 
 # IntelliJ
 out/
+
+# Project specific
+data.cook
+config.json
