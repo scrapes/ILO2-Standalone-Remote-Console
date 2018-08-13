@@ -1,18 +1,11 @@
 package com.hp.ilo2.remcons;
 
 
-
-
-
-
-
-
-
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class RC4
 {
-  VMD5 digest;
 
 
 
@@ -33,18 +26,21 @@ public class RC4
   RC4(byte[] paramArrayOfByte)
   {
     System.arraycopy(paramArrayOfByte, 0, this.pre, 0, 16);
-    this.digest = new VMD5();
-    update_key();
+      try {
+          update_key();
+      } catch (NoSuchAlgorithmException e) {
+          e.printStackTrace();
+      }
   }
 
 
 
-  void update_key()
-  {
-    this.digest.reset();
-    this.digest.update(this.pre);
-    this.digest.update(this.key);
-    byte[] arrayOfByte = this.digest.digest();
+  void update_key() throws NoSuchAlgorithmException {
+    MessageDigest md = MessageDigest.getInstance("MD5");
+    md.update(this.pre);
+    md.update(this.key);
+
+    byte[] arrayOfByte = md.digest();
     System.arraycopy(arrayOfByte, 0, this.key, 0, this.key.length);
 
 
