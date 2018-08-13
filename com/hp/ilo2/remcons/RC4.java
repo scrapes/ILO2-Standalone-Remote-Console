@@ -1,5 +1,8 @@
 /*    */ package com.hp.ilo2.remcons;
-/*    */ 
+/*    */
+/*    */import java.security.MessageDigest;
+/*    */import java.security.NoSuchAlgorithmException;
+/*    */
 /*    */ 
 /*    */ 
 /*    */ 
@@ -12,7 +15,6 @@
 /*    */ 
 /*    */ public class RC4
 /*    */ {
-/*    */   VMD5 digest;
 /*    */   
 /*    */ 
 /*    */ 
@@ -33,18 +35,23 @@
 /*    */   RC4(byte[] paramArrayOfByte)
 /*    */   {
 /* 35 */     System.arraycopy(paramArrayOfByte, 0, this.pre, 0, 16);
-/* 36 */     this.digest = new VMD5();
-/* 37 */     update_key();
+/* 37 */
+/*    */     try {
+/*    */         update_key();
+/*    */     } catch (NoSuchAlgorithmException e) {
+/*    */         e.printStackTrace();
+/*    */     }
 /*    */   }
 /*    */   
 /*    */ 
 /*    */ 
-/*    */   void update_key()
+/*    */   void update_key() throws NoSuchAlgorithmException
 /*    */   {
-/* 44 */     this.digest.reset();
-/* 45 */     this.digest.update(this.pre);
-/* 46 */     this.digest.update(this.key);
-/* 47 */     byte[] arrayOfByte = this.digest.digest();
+/*    */     MessageDigest digest = MessageDigest.getInstance("MD5");
+/*    */     digest.update(this.pre);
+/*    */     digest.update(this.key);
+/*    */     byte[] arrayOfByte = digest.digest();
+/*    */
 /* 48 */     System.arraycopy(arrayOfByte, 0, this.key, 0, this.key.length);
 /*    */     
 /*    */ 
