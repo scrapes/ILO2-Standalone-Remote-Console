@@ -11,7 +11,9 @@
 /*      */ import java.io.IOException;
 /*      */ import java.io.PrintStream;
 /*      */ import java.lang.reflect.Method;
-/*      */ 
+import java.security.NoSuchAlgorithmException;
+
+/*      */
 /*      */ 
 /*      */ 
 /*      */ 
@@ -2355,7 +2357,11 @@
 /*      */ 
 /*      */   public void change_key()
 /*      */   {
-/* 2358 */     this.RC4encrypter.update_key();
+/* 2358 */     try {
+/*      */       this.RC4encrypter.update_key();
+/*      */     } catch (NoSuchAlgorithmException e) {
+/*      */       e.printStackTrace();
+/*      */     }
 /* 2359 */     super.change_key();
 /*      */   }
 /*      */   
