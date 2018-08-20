@@ -11,30 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import java.security.NoSuchAlgorithmException;
 
 
 public class cim
@@ -2355,7 +2332,11 @@ public class cim
 
   public void change_key()
   {
-    this.RC4encrypter.update_key();
+    try {
+      this.RC4encrypter.update_key();
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    }
     super.change_key();
   }
 
