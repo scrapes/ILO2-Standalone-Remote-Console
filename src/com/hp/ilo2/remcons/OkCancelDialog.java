@@ -69,7 +69,7 @@ public class OkCancelDialog extends java.awt.Dialog implements java.awt.event.Ac
 
 
 
-    show();
+    setVisible(true);
   }
 
 
