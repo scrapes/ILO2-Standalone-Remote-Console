@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 
@@ -901,7 +902,11 @@ public class telnet
 
   public void change_key()
   {
-    this.RC4decrypter.update_key();
+    try {
+      this.RC4decrypter.update_key();
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    }
   }
 
   void focusTraversalKeysDisable(Object paramObject)
