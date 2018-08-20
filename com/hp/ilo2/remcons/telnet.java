@@ -18,6 +18,7 @@
 /*     */ import java.net.Socket;
 /*     */ import java.net.SocketException;
 /*     */ import java.net.UnknownHostException;
+/*     */ import java.security.NoSuchAlgorithmException;
 /*     */ import java.util.Properties;
 /*     */ 
 /*     */ 
@@ -901,7 +902,11 @@
 /*     */ 
 /*     */   public void change_key()
 /*     */   {
-/* 904 */     this.RC4decrypter.update_key();
+/*     */     try {
+/* 904 */       this.RC4decrypter.update_key();
+/*     */     } catch (NoSuchAlgorithmException e) {
+/*     */       e.printStackTrace();
+/*     */     }
 /*     */   }
 /*     */   
 /*     */   void focusTraversalKeysDisable(Object paramObject)
