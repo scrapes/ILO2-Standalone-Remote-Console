@@ -52,8 +52,8 @@ public class Main {
 
     private static String loginURL = "";
 
-    private static String Sessionkey = "";
-    private static String Sessionindex = "";
+    private static String sessionKey = "";
+    private static String sessionIndex = "";
     private static String supercookie = "";
 
     private static CookieManager cookieManager = new CookieManager();
@@ -87,10 +87,10 @@ public class Main {
         in.close();
 
         String res = response.toString();
-        Sessionkey = res.split("var sessionkey=\"")[1].split("\";")[0];
-        Sessionindex = res.split("var sessionindex=\"")[1].split("\";")[0];
-        System.out.println("Session key: " + Sessionkey);
-        System.out.println("Session  ID: " + Sessionindex);
+        sessionKey = res.split("var sessionkey=\"")[1].split("\";")[0];
+        sessionIndex = res.split("var sessionindex=\"")[1].split("\";")[0];
+        System.out.println("Session key: " + sessionKey);
+        System.out.println("Session  ID: " + sessionIndex);
     }
 
 
@@ -110,7 +110,7 @@ public class Main {
         con.setDoOutput(true);
         BASE64Encoder enc = new BASE64Encoder(); //Authenticate
 
-        con.setRequestProperty("Cookie", "hp-iLO-Login=" + Sessionindex + ":" + enc.encode(username.getBytes()) + ":" + enc.encode(password.getBytes()) + ":" + Sessionkey);
+        con.setRequestProperty("Cookie", "hp-iLO-Login=" + sessionIndex + ":" + enc.encode(username.getBytes()) + ":" + enc.encode(password.getBytes()) + ":" + sessionKey);
 
 
         BufferedReader in = new BufferedReader(
