@@ -34,7 +34,7 @@ var sessionkey="LMQJVGLGKQGMIAAEGQHZJUORCOBVQOUZIEXNVTUO";
 var sessionindex="00000005";
 
 
- */
+*/
 
 public class Main {
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
@@ -49,11 +49,10 @@ public class Main {
     private static String Sessionindex = "";
     private static String supercookie = "";
 
-
     private static CookieManager cookieManager = new CookieManager();
 
-    private static void Stage1() throws Exception
-    {
+
+    private static void Stage1() throws Exception {
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
         String url = "https://" + Hostname + "/login.htm";
@@ -87,9 +86,9 @@ public class Main {
         System.out.println(Sessionkey);
         System.out.println(Sessionindex);
     }
+
+
     private static void Stage2() throws Exception {
-
-
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
 
@@ -130,6 +129,7 @@ public class Main {
 
     }
 
+
     private static HashMap<String, String> hmap = new HashMap<>();
     private static void Stage3() throws Exception
     {
@@ -149,8 +149,7 @@ public class Main {
         con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
         con.setRequestProperty("Host", Hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
-        if(supercookie != "")
-        {
+        if(supercookie != "") {
             con.setRequestProperty("Cookie", supercookie);
         }
 
@@ -187,13 +186,10 @@ public class Main {
         hmap.put("CABBASE", res.split("<PARAM NAME=CABBASE VALUE=")[1].split(">\"")[0]);
 
         System.out.println(hmap.get("CABBASE"));
-
-
-
     }
 
-    public static boolean isValid(String cookie) throws Exception
-    {
+
+    public static boolean isValid(String cookie) throws Exception {
         CookieHandler.setDefault(cookieManager);
         String url = "https://" + Hostname + "/ie_index.htm";
         URL obj = new URL(url);
@@ -224,8 +220,9 @@ public class Main {
 
         return !(res.contains("Login Delay") || res.contains("Integrated Lights-Out 2 Login"));
     }
-    public static void main(String[] args){
 
+
+    public static void main(String[] args) {
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
         CookieHandler.setDefault(cookieManager);
@@ -242,37 +239,28 @@ public class Main {
             e.printStackTrace();
             return;
         }
-        try
-        {
+        try {
             try (BufferedReader br = new BufferedReader(new FileReader("data.cook"))) {
                 System.out.println("Found Datastore");
                 String line;
                 String lastline = "";
                 while ((line = br.readLine()) != null) {
-                    cookieManager.getCookieStore().add(new URI("https://" + Hostname + ""), new HttpCookie(line.split("=")[0], line.split("=")[1]));
+                    cookieManager.getCookieStore().add(new URI("https://" + hostname + ""), new HttpCookie(line.split("=")[0], line.split("=")[1]));
                     lastline = line;
                 }
 
-                if(!isValid(lastline))
-                {
+                if(!isValid(lastline)) {
                     System.out.println("Datastore not Valid, requesting Cookie");
                     Stage1();
                     Stage2();
-
-                }
-                else
-                {
+                } else {
                     supercookie = lastline;
                 }
-
-            }
-            catch(Exception e)
-            {
+            } catch(Exception e) {
                 e.printStackTrace();
                 System.out.println("Didnt found data Store, requesting Cookie");
                 Stage1();
                 Stage2();
-
             }
             Stage3();
             //hmap.put("IPADDR", Hostname);
@@ -281,23 +269,15 @@ public class Main {
             remcons rmc = new remcons(hmap);
             rmc.SetHost(Hostname);
 
-            JFrame jf = new JFrame ();
-            Container c = jf.getContentPane ();
-            jf.setBounds (0, 0, 1070,880);
-            jf.setVisible (true);
-            c.add (rmc);
+            JFrame jf = new JFrame();
+            Container c = jf.getContentPane();
+            jf.setBounds(0, 0, 1070,880);
+            jf.setVisible(true);
+            c.add(rmc);
             rmc.init();
             rmc.start();
-
-
-
-
-        }
-
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }
