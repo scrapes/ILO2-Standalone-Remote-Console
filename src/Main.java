@@ -236,9 +236,9 @@ public class Main {
             _password = js.at("Password").asString();
             Hostname = js.at("Hostname").asString();
         }
-        catch (Exception ee){
+        catch (Exception e){
             System.err.println("Error in parsing config file!");
-            System.err.println(ee.toString());
+            e.printStackTrace();
             return;
         }
         try
@@ -265,9 +265,9 @@ public class Main {
                 }
 
             }
-            catch(Exception ee)
+            catch(Exception e)
             {
-                System.err.println(ee.toString());
+                e.printStackTrace();
                 System.out.println("Didnt found data Store, requesting Cookie");
                 Stage1();
                 Stage2();
@@ -293,9 +293,9 @@ public class Main {
 
         }
 
-        catch (Exception ee)
+        catch (Exception e)
         {
-            System.err.println(ee.toString());
+            e.printStackTrace();
         }
 
     }
