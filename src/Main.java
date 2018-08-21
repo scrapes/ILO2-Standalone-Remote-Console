@@ -41,8 +41,8 @@ public class Main {
 
     private static final String COOKIE_FILE = "data.cook";
 
-    private static String _username = "";
-    private static String _password = "";
+    private static String username = "";
+    private static String password = "";
     private static String hostname = "";
 
     public static void setHostname(String hostname) {
@@ -110,7 +110,7 @@ public class Main {
         con.setDoOutput(true);
         BASE64Encoder enc = new BASE64Encoder(); //Authenticate
 
-        con.setRequestProperty("Cookie", "hp-iLO-Login=" + Sessionindex + ":" + enc.encode(_username.getBytes()) + ":" + enc.encode(_password.getBytes()) + ":" + Sessionkey);
+        con.setRequestProperty("Cookie", "hp-iLO-Login=" + Sessionindex + ":" + enc.encode(username.getBytes()) + ":" + enc.encode(password.getBytes()) + ":" + Sessionkey);
 
 
         BufferedReader in = new BufferedReader(
@@ -235,8 +235,8 @@ public class Main {
             String config = new String(Files.readAllBytes(Paths.get("config.json")));
             System.out.println("Config JSON:" + config);
             Json js = Json.read(config);
-            _username = js.at("Username").asString();
-            _password = js.at("Password").asString();
+            username = js.at("Username").asString();
+            password = js.at("Password").asString();
             setHostname(js.at("Hostname").asString());
         } catch (Exception e) {
             System.err.println("Error in parsing config file!");
