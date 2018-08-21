@@ -39,6 +39,8 @@ var sessionindex="00000005";
 public class Main {
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
 
+    private static final String COOKIE_FILE = "data.cook";
+
     private static String _username = "";
     private static String _password = "";
     private static String Hostname = "";
@@ -96,7 +98,6 @@ public class Main {
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-
         con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
         con.setRequestProperty("Host", Hostname);
@@ -111,7 +112,7 @@ public class Main {
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -119,7 +120,7 @@ public class Main {
         in.close();
 
         List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
-        PrintWriter writer = new PrintWriter("data.cook", "UTF-8");
+        PrintWriter writer = new PrintWriter(COOKIE_FILE, "UTF-8");
         for (HttpCookie cookie : cookies) {
             System.out.println(cookie.getDomain());
             System.out.println(cookie);
@@ -156,7 +157,7 @@ public class Main {
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -212,7 +213,7 @@ public class Main {
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
