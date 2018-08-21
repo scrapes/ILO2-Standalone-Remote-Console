@@ -43,7 +43,14 @@ public class Main {
 
     private static String _username = "";
     private static String _password = "";
-    private static String Hostname = "";
+    private static String hostname = "";
+
+    public static void setHostname(String hostname) {
+        Main.hostname = hostname;
+        Main.loginURL = "https://" + hostname + "/login.htm";
+    }
+
+    private static String loginURL = "";
 
     private static String Sessionkey = "";
     private static String Sessionindex = "";
@@ -55,8 +62,7 @@ public class Main {
     private static void Stage1() throws Exception {
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
-        String url = "https://" + Hostname + "/login.htm";
-        URL obj = new URL(url);
+        URL obj = new URL(loginURL);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         // optional default is GET
@@ -64,8 +70,8 @@ public class Main {
 
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
-        con.setRequestProperty("Host", Hostname);
+        con.setRequestProperty("Referer", "https://" + hostname + "/login.htm");
+        con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
         con.setRequestProperty("Cookie", "hp-iLO-Login=");
 
@@ -73,7 +79,7 @@ public class Main {
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -92,14 +98,13 @@ public class Main {
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
 
-        String url = "https://" + Hostname + "/index.htm";
-        URL obj = new URL(url);
+        URL obj = new URL(loginURL);
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
-        con.setRequestProperty("Host", Hostname);
+        con.setRequestProperty("Referer", loginURL);
+        con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
         //Cookie:
         con.setDoOutput(true);
@@ -131,12 +136,12 @@ public class Main {
 
 
     private static HashMap<String, String> hmap = new HashMap<>();
-    private static void Stage3() throws Exception
-    {
-        // https://" + Hostname + "/drc2fram.htm?restart=1
+
+    private static void Stage3() throws Exception {
+        // https://" + hostname + "/drc2fram.htm?restart=1
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
-        String url = "https://" + Hostname + "/drc2fram.htm?restart=1";
+        String url = "https://" + hostname + "/drc2fram.htm?restart=1";
         URL obj = new URL(url);
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -146,8 +151,8 @@ public class Main {
 
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
-        con.setRequestProperty("Host", Hostname);
+        con.setRequestProperty("Referer", loginURL);
+        con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
         if(supercookie != "") {
             con.setRequestProperty("Cookie", supercookie);
@@ -191,7 +196,7 @@ public class Main {
 
     public static boolean isValid(String cookie) throws Exception {
         CookieHandler.setDefault(cookieManager);
-        String url = "https://" + Hostname + "/ie_index.htm";
+        String url = "https://" + hostname + "/ie_index.htm";
         URL obj = new URL(url);
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -201,8 +206,8 @@ public class Main {
 
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
-        con.setRequestProperty("Host", Hostname);
+        con.setRequestProperty("Referer", loginURL);
+        con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
         con.setRequestProperty("Cookie", cookie);
 
@@ -232,9 +237,8 @@ public class Main {
             Json js = Json.read(config);
             _username = js.at("Username").asString();
             _password = js.at("Password").asString();
-            Hostname = js.at("Hostname").asString();
-        }
-        catch (Exception e){
+            setHostname(js.at("Hostname").asString());
+        } catch (Exception e) {
             System.err.println("Error in parsing config file!");
             e.printStackTrace();
             return;
@@ -245,7 +249,7 @@ public class Main {
                 String line;
                 String lastline = "";
                 while ((line = br.readLine()) != null) {
-                    cookieManager.getCookieStore().add(new URI("https://" + hostname + ""), new HttpCookie(line.split("=")[0], line.split("=")[1]));
+                    cookieManager.getCookieStore().add(new URI("https://" + hostname), new HttpCookie(line.split("=")[0], line.split("=")[1]));
                     lastline = line;
                 }
 
@@ -263,11 +267,11 @@ public class Main {
                 Stage2();
             }
             Stage3();
-            //hmap.put("IPADDR", Hostname);
+            //hmap.put("IPADDR", hostname);
             //hmap.put("DEBUG", "suckAdIck");
 
             remcons rmc = new remcons(hmap);
-            rmc.SetHost(Hostname);
+            rmc.SetHost(hostname);
 
             JFrame jf = new JFrame();
             Container c = jf.getContentPane();
