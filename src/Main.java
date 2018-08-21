@@ -7,10 +7,7 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -186,7 +183,7 @@ public class Main {
 
         hmap.put("CABBASE", res.split("<PARAM NAME=CABBASE VALUE=")[1].split(">\"")[0]);
 
-        System.out.println(hmap.get("CABBASE"));
+        System.out.println("CABBASE = " + hmap.get("CABBASE"));
     }
 
 
@@ -241,7 +238,7 @@ public class Main {
         }
         try {
             try (BufferedReader br = new BufferedReader(new FileReader("data.cook"))) {
-                System.out.println("Found Datastore");
+                System.out.println("Found datastore");
                 String line;
                 String lastline = "";
                 while ((line = br.readLine()) != null) {
@@ -250,17 +247,18 @@ public class Main {
                 }
 
                 if(!isValid(lastline)) {
-                    System.out.println("Datastore not Valid, requesting Cookie");
+                    System.out.println("Datastore not valid, requesting Cookie");
                     Stage1();
                     Stage2();
                 } else {
                     supercookie = lastline;
                 }
-            } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println("Didnt found data Store, requesting Cookie");
+            } catch (FileNotFoundException e) {
+                System.out.println("Couldn't find datastore, requesting Cookie");
                 Stage1();
                 Stage2();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             Stage3();
             //hmap.put("IPADDR", hostname);
