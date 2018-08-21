@@ -70,7 +70,7 @@ public class Main {
 
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + hostname + "/login.htm");
+        con.setRequestProperty("Referer", loginURL);
         con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
         con.setRequestProperty("Cookie", "hp-iLO-Login=");
@@ -89,8 +89,8 @@ public class Main {
         String res = response.toString();
         Sessionkey = res.split("var sessionkey=\"")[1].split("\";")[0];
         Sessionindex = res.split("var sessionindex=\"")[1].split("\";")[0];
-        System.out.println(Sessionkey);
-        System.out.println(Sessionindex);
+        System.out.println("Session key: " + Sessionkey);
+        System.out.println("Session  ID: " + Sessionindex);
     }
 
 
@@ -126,8 +126,7 @@ public class Main {
         List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
         PrintWriter writer = new PrintWriter(COOKIE_FILE, "UTF-8");
         for (HttpCookie cookie : cookies) {
-            System.out.println(cookie.getDomain());
-            System.out.println(cookie);
+            System.out.format("Cookie: %s: %s\n", cookie.getDomain(), cookie);
             writer.println(cookie.toString().replace("\"", ""));
         }
         writer.close();
