@@ -98,7 +98,7 @@ public class Main {
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
 
-        URL obj = new URL(loginURL);
+        URL obj = new URL("https://" + hostname + "/index.htm");
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
