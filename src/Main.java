@@ -115,12 +115,9 @@ public class Main {
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
 
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
+        //noinspection StatementWithEmptyBody
+        while (in.readLine() != null) { } // discard
         in.close();
 
         List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
