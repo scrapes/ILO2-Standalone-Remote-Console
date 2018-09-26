@@ -1,8 +1,7 @@
 package com.hp.ilo2.remcons;
 
-interface TimerListener
-{
-  void timeout(Object callbackInfo);
+interface TimerListener {
+    void timeout(Object callbackInfo);
 }
 
 /* Location:              C:\Users\anton\Documents\ILO2\rc175p10.jar!\com\hp\ilo2\remcons\TimerListener.class
