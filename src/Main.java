@@ -120,7 +120,7 @@ public class Main {
         List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
         PrintWriter writer = new PrintWriter(COOKIE_FILE, "UTF-8");
         for (HttpCookie cookie : cookies) {
-            System.out.format("Cookie: %s: %s\n", cookie.getDomain(), cookie);
+            System.out.format("Session cookie: %s: %s\n", cookie.getDomain(), cookie);
             writer.println(cookie.toString().replace("\"", ""));
         }
         writer.close();
