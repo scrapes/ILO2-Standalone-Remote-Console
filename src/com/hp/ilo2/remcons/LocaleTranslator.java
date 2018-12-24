@@ -1,15 +1,11 @@
 package com.hp.ilo2.remcons;
 
-import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
-import java.util.Properties;
 
 
-
-class LocaleTranslator
-{
+class LocaleTranslator {
   Hashtable<String, Hashtable<Character, String>> locales;
   Hashtable<String, String> aliases;
   Hashtable<Character, String> selected;
@@ -71,25 +67,25 @@ class LocaleTranslator
   String swiss_german = "\031\032 \032\031 !} \"@ #\033[+3 $\\ &^ '- (* )( *# +! -/ /& :> ;< <ð =) >ñ ?_ @\033[+2 YZ ZY [\033[+[ \\\033[+ð ]\033[+] ^=  _? `+  yz zy {\033[+' |\033[+7 }\033[+\\ ~\033[+=  ¢\033[+8 £| ¦\033[+1 §` ¨]  ¬\033[+6 °~ ´\033[+-  À+A Á\033[+-A Â=A Ã\033[+=A Ä]A È+E É\033[+-E Ê=E Ë]E Ì+I Í\033[+-I Î=I Ï]I Ñ\033[+=N Ò+O Ó\033[+-O Ô=O Õ\033[+=O Ö]O Ù+U Ú\033[+-U Û=U Ü]U Ý\033[+-Z à+a á\033[+-a â=a ã\033[+=a ä]a ç$ è+e é\033[+-e ê=e ë]e ì+i í\033[+-i î=i ï]i ñ\033[+=n ò+o ó\033[+-o ô=o õ\033[+=o ö]o ù+u ú\033[+-u û=u ü]u ý\033[+-z ÿ]z";
 
   String create_accents(String paramString1, String paramString2) {
-    StringBuffer localStringBuffer = new StringBuffer(256);
+    StringBuilder localStringBuilder = new StringBuilder(256);
 
 
 
     for (int i = 0; i < paramString1.length(); i++) {
       char c = paramString1.charAt(i);
       if (c == '*') {
-        localStringBuffer.append(paramString2);
+        localStringBuilder.append(paramString2);
       } else {
-        localStringBuffer.append(c);
+        localStringBuilder.append(c);
       }
     }
-    return localStringBuffer.toString();
+    return localStringBuilder.toString();
   }
 
 
-  void parse_locale_str(String paramString, Hashtable paramHashtable) {
+  void parse_locale_str(String paramString, Hashtable<Character, String> paramHashtable) {
     int j = 0;
-    char c = '\000';
+    char c;
     Character localCharacter = null;
     StringBuffer localStringBuffer = new StringBuffer(16);
 
@@ -97,7 +93,7 @@ class LocaleTranslator
       c = paramString.charAt(i);
       if ((j == 0) && (c != ' ')) {
         j++;
-        localCharacter = new Character(c);
+        localCharacter = c;
       }
       else {
         if ((j == 1) && (c != ' '))
@@ -118,7 +114,7 @@ class LocaleTranslator
 
 
   void add_locale(String paramString1, String paramString2, String paramString3) {
-    Hashtable localHashtable = new Hashtable();
+    Hashtable<Character, String> localHashtable = new Hashtable<>();
 
 
     parse_locale_str(paramString2, localHashtable);
@@ -143,8 +139,6 @@ class LocaleTranslator
     this.reverse_alias = new Hashtable<>();
 
     String str2 = null;
-
-
 
     this.locales.put("en_US", new Hashtable<Character, String>());
     add_alias("en_US", "English (United States)");
@@ -176,19 +170,12 @@ class LocaleTranslator
     add_iso_alias("es_MX", "es_UY");
     add_iso_alias("es_MX", "es_VE");
 
-
     add_locale("fr_BE", this.belgian + this.euro2, "French Belgium");
     add_locale("fr_CA", this.french_canadian + this.euro2, "French Canadian");
     add_locale("da_DK", this.danish + this.euro2, "Danish");
 
-
-
-
-
     add_locale("no_NO", this.norwegian + this.euro2, "Norwegian");
     add_locale("pt_PT", this.portuguese + this.euro2, "Portugese");
-
-
 
     add_locale("sv_SE", this.swedish + this.euro2, "Swedish");
     add_locale("fi_FI", this.finnish + this.euro2, "Finnish");
@@ -197,24 +184,24 @@ class LocaleTranslator
     add_locale("de_CH", this.swiss_german + this.euro2, "Swiss (German)");
 
 
-    Enumeration localEnumeration = remcons.prop.propertyNames();
-    Object localObject; while (localEnumeration.hasMoreElements()) {
-      String str1 = (String)localEnumeration.nextElement();
-      if (str1.equals("locale.override")) {
-        str2 = remcons.prop.getProperty(str1);
+    Enumeration propertyNames = remcons.prop.propertyNames();
+    String localString;
+    while (propertyNames.hasMoreElements()) {
+      String currentPropName = (String)propertyNames.nextElement();
+      if (currentPropName.equals("locale.override")) {
+        str2 = remcons.prop.getProperty("locale.override");
         System.out.println("Locale override: " + str2);
-      } else if (str1.startsWith("locale.windows")) {
-        this.windows = Boolean.valueOf(remcons.prop.getProperty(str1)).booleanValue();
-      } else if (str1.startsWith("locale.showgui")) {
-        this.showgui = Boolean.valueOf(remcons.prop.getProperty(str1)).booleanValue();
-      } else if (str1.startsWith("locale.")) {
-        localObject = str1.substring(7);
-        String str3 = remcons.prop.getProperty(str1);
-        System.out.println("Adding user defined local for " + (String)localObject);
-        add_locale((String)localObject, str3, (String)localObject + " (User Defined)");
+      } else if (currentPropName.startsWith("locale.windows")) {
+        this.windows = Boolean.valueOf(remcons.prop.getProperty(currentPropName));
+      } else if (currentPropName.startsWith("locale.showgui")) {
+        this.showgui = Boolean.valueOf(remcons.prop.getProperty(currentPropName));
+      } else if (currentPropName.startsWith("locale.")) {
+        localString = currentPropName.substring(7);
+        String str3 = remcons.prop.getProperty(currentPropName);
+        System.out.println("Adding user defined local for " + localString);
+        add_locale(localString, str3, localString + " (User Defined)");
       }
     }
-
 
     if (str2 != null) {
       System.out.println("Trying to select locale: " + str2);
@@ -222,10 +209,10 @@ class LocaleTranslator
         System.out.println("No keyboard definition for " + str2);
       }
     } else {
-      localObject = Locale.getDefault();
-      System.out.println("Trying to select locale: " + ((Locale)localObject).toString());
-      if (selectLocale(((Locale)localObject).toString()) != 0) {
-        System.out.println("No keyboard definition for '" + ((Locale)localObject).toString() + "'");
+      Locale locale = Locale.getDefault();
+      System.out.println("Trying to select locale: " + locale.toString());
+      if (selectLocale(locale.toString()) != 0) {
+        System.out.println("No keyboard definition for '" + locale.toString() + "'");
       }
     }
   }
@@ -240,34 +227,33 @@ class LocaleTranslator
     return this.selected != null ? 0 : -1;
   }
 
-
-  public String translate(char paramChar) {
+  public String translate(char aChar) {
     String str = null;
 
     if (this.selected != null) {
-      str = this.selected.get(paramChar);
+      str = this.selected.get(aChar);
     }
 
-    return str == null ? Character.toString(paramChar) : str;
+    return str == null ? Character.toString(aChar) : str;
   }
 
   public String[] getLocales() {
     int i = this.aliases.size();
     String[] arrayOfString = new String[i];
 
-    Enumeration localEnumeration = this.aliases.keys();
+    Enumeration<String> localEnumeration = this.aliases.keys();
 
     int j = 0;
     while (localEnumeration.hasMoreElements()) {
-      arrayOfString[(j++)] = ((String)localEnumeration.nextElement());
+      arrayOfString[(j++)] = localEnumeration.nextElement();
     }
 
     for (j = 0; j < i - 1; j++) {
       for (int k = j + 1; k < i; k++) {
         if (arrayOfString[k].compareTo(arrayOfString[j]) < 0) {
-          String str = arrayOfString[k];
+          String tmp = arrayOfString[k];
           arrayOfString[k] = arrayOfString[j];
-          arrayOfString[j] = str;
+          arrayOfString[j] = tmp;
         }
       }
     }
@@ -278,9 +264,3 @@ class LocaleTranslator
     return this.selected_name;
   }
 }
-
-
-/* Location:              C:\Users\anton\Documents\ILO2\rc175p10.jar!\com\hp\ilo2\remcons\LocaleTranslator.class
- * Java compiler version: 4 (48.0)
- * JD-Core Version:       0.7.1
- */
