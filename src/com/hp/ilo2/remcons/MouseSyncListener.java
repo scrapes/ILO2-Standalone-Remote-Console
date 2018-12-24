@@ -1,14 +1,13 @@
 package com.hp.ilo2.remcons;
 
-interface MouseSyncListener
-{
-  void serverMove(int paramInt1, int paramInt2, int paramInt3, int paramInt4);
-  
-  void serverPress(int paramInt);
-  
-  void serverRelease(int paramInt);
-  
-  void serverClick(int paramInt1, int paramInt2);
+interface MouseSyncListener {
+    void serverMove(int paramInt1, int paramInt2, int clientX, int clientY);
+
+    void serverPress(int button);
+
+    void serverRelease(int button);
+
+    void serverClick(int button, int paramInt2);
 }
 
 
