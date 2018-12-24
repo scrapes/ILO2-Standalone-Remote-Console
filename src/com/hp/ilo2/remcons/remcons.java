@@ -2,7 +2,7 @@ package com.hp.ilo2.remcons;
 
 import java.applet.Applet;
 import java.applet.AppletStub;
-          import java.awt.Button;
+import java.awt.Button;
 import java.awt.Checkbox;
 import java.awt.Choice;
 import java.awt.Color;
@@ -26,22 +26,6 @@ import java.util.Properties;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 public class remcons
   extends Applet
   implements ActionListener, ItemListener, TimerListener, Runnable, AppletStub
@@ -53,7 +37,7 @@ public class remcons
   private static final int SESSION_TIMEOUT_DEFAULT = 900;
   private static final int KEEP_ALIVE_INTERVAL = 30;
   private static final int INFINITE_TIMEOUT = 2147483640;
-  private int session_timeout = 900;
+  private int session_timeout = SESSION_TIMEOUT_DEFAULT;
 
   private cim session;
 
@@ -115,34 +99,7 @@ public class remcons
 
   private static final char[] base64 = { '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '>', '\000', '\000', '\000', '?', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\b', '\t', '\n', '\013', '\f', '\r', '\016', '\017', '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\000', '\000', '\000', '\000', '\000', '\000', '\032', '\033', '\034', '\035', '\036', '\037', ' ', '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '\000', '\000', '\000', '\000', '\000' };
 
-
-
-
-
-
-
-
-
-
-
   public int initialized = 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -204,10 +161,6 @@ public class remcons
     this.kbd_locale_label = new Label("", 2);
 
 
-
-
-
-
     this.session = new cim();
 
     if (this.session_encryption_enabled)
@@ -259,14 +212,6 @@ public class remcons
     this.session_window = new Panel();
 
 
-
-
-
-
-
-
-
-
     this.session_window.setLayout(new GridBagLayout());
     GridBagConstraints localObject = new GridBagConstraints();
     localObject.fill = 0;
@@ -287,10 +232,6 @@ public class remcons
   }
 
 
-
-
-
-
   public void start()
   {
     update_strings();
@@ -305,13 +246,11 @@ public class remcons
   }
 
 
-
   public void stop()
   {
     stop_session();
     System.out.println("Applet stopped...");
   }
-
 
 
   public void timeout(Object paramObject)
@@ -326,7 +265,7 @@ public class remcons
     else
     {
       this.session.send_auto_alive_msg();
-      this.timeout_countdown -= 30;
+      this.timeout_countdown -= KEEP_ALIVE_INTERVAL;
 
       if (this.timeout_countdown <= 0)
       {
@@ -336,7 +275,6 @@ public class remcons
       }
     }
   }
-
 
 
   private void update_strings()
@@ -362,16 +300,6 @@ public class remcons
       this.term_svcs.setLabel(this.term_svcs_label);
     }
   }
-
-
-
-
-
-
-
-
-
-
 
 
   public void itemStateChanged(ItemEvent paramItemEvent)
@@ -419,17 +347,6 @@ public class remcons
   }
 
 
-
-
-
-
-
-
-
-
-
-
-
   private void start_session()
   {
     if (this.session_ip == null) {
@@ -446,6 +363,7 @@ public class remcons
     }
   }
 
+
   private void stop_session()
   {
     if (this.timer != null) {
@@ -456,17 +374,14 @@ public class remcons
     this.session.disconnect();
   }
 
-            private String huust = "";
 
-            public void SetHost(String hst)
+  private String huust = "";
+
+
+  public void SetHost(String hst)
             {
                 huust = hst;
             }
-
-
-
-
-
 
 
   public void actionPerformed(ActionEvent paramActionEvent)
@@ -483,69 +398,16 @@ public class remcons
       this.session.startRdp();
     }
   }
-            public String getParameter(String name) {
+
+
+  public String getParameter(String name) {
                 return params.get(name);
             }
 
-            public void addParameter(String name, String value) {
+
+  public void addParameter(String name, String value) {
                 params.put(name, value);
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   protected void init_params()
@@ -653,13 +515,6 @@ public class remcons
       }
 
 
-
-
-
-
-
-
-
       str = getParameter("INFOC");
       if (str != null) {
         try
@@ -675,13 +530,6 @@ public class remcons
       } else {
         this.session_encrypt_key = null;
       }
-
-
-
-
-
-
-
 
 
       str = getParameter("INFOD");
@@ -762,15 +610,6 @@ public class remcons
   }
 
 
-
-
-
-
-
-
-
-
-
   private String parse_login(String paramString)
   {
     if (paramString.startsWith("Compaq-RIB-Login=")) {
@@ -791,17 +630,6 @@ public class remcons
 
     return base64_decode(paramString);
   }
-
-
-
-
-
-
-
-
-
-
-
 
 
   private String base64_decode(String paramString)
@@ -857,27 +685,13 @@ public class remcons
   }
 
 
-
-
-
   public void paint(Graphics paramGraphics) {}
-
-
 
 
   public int getTimeoutValue()
   {
     return this.timeout_countdown;
   }
-
-
-
-
-
-
-
-
-
 
 
   public void run()
@@ -887,8 +701,6 @@ public class remcons
       Locale.setDefault(Locale.US);
     }
   }
-
-
 
 
   public int getInitialized()
@@ -910,6 +722,7 @@ public class remcons
     this.term_svcs_label = prop.getProperty(str + ".label", "Terminal Svcs");
   }
 
+
   static {
     prop = new Properties();
     try {
@@ -923,7 +736,8 @@ public class remcons
       System.out.println("Exception: " + localException);
     }
   }
-            public HashMap<String,String> params = new HashMap<String,String>();
 
-            public void appletResize(int width, int height) {}
+  public HashMap<String,String> params = new HashMap<String,String>();
+
+  public void appletResize(int width, int height) {}
 }

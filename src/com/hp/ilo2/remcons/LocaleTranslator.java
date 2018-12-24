@@ -8,68 +8,16 @@ import java.util.Properties;
 
 
 
-
-
-
-
-
-
-
 class LocaleTranslator
 {
-  Hashtable locales;
-  Hashtable aliases;
-  Hashtable selected;
-  Hashtable reverse_alias;
+  Hashtable<String, Hashtable<Character, String>> locales;
+  Hashtable<String, String> aliases;
+  Hashtable<Character, String> selected;
+  Hashtable<String, String> reverse_alias;
   public boolean showgui = false;
   public boolean windows = true;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   String selected_name;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   String euro1 = " €\033[+4";
   String euro2 = " €\033[+e";
@@ -122,8 +70,7 @@ class LocaleTranslator
 
   String swiss_german = "\031\032 \032\031 !} \"@ #\033[+3 $\\ &^ '- (* )( *# +! -/ /& :> ;< <ð =) >ñ ?_ @\033[+2 YZ ZY [\033[+[ \\\033[+ð ]\033[+] ^=  _? `+  yz zy {\033[+' |\033[+7 }\033[+\\ ~\033[+=  ¢\033[+8 £| ¦\033[+1 §` ¨]  ¬\033[+6 °~ ´\033[+-  À+A Á\033[+-A Â=A Ã\033[+=A Ä]A È+E É\033[+-E Ê=E Ë]E Ì+I Í\033[+-I Î=I Ï]I Ñ\033[+=N Ò+O Ó\033[+-O Ô=O Õ\033[+=O Ö]O Ù+U Ú\033[+-U Û=U Ü]U Ý\033[+-Z à+a á\033[+-a â=a ã\033[+=a ä]a ç$ è+e é\033[+-e ê=e ë]e ì+i í\033[+-i î=i ï]i ñ\033[+=n ò+o ó\033[+-o ô=o õ\033[+=o ö]o ù+u ú\033[+-u û=u ü]u ý\033[+-z ÿ]z";
 
-  String create_accents(String paramString1, String paramString2)
-  {
+  String create_accents(String paramString1, String paramString2) {
     StringBuffer localStringBuffer = new StringBuffer(256);
 
 
@@ -140,8 +87,7 @@ class LocaleTranslator
   }
 
 
-  void parse_locale_str(String paramString, Hashtable paramHashtable)
-  {
+  void parse_locale_str(String paramString, Hashtable paramHashtable) {
     int j = 0;
     char c = '\000';
     Character localCharacter = null;
@@ -171,8 +117,7 @@ class LocaleTranslator
   }
 
 
-  void add_locale(String paramString1, String paramString2, String paramString3)
-  {
+  void add_locale(String paramString1, String paramString2, String paramString3) {
     Hashtable localHashtable = new Hashtable();
 
 
@@ -187,23 +132,21 @@ class LocaleTranslator
     this.reverse_alias.put(paramString2, this.reverse_alias.get(paramString1));
   }
 
-  void add_alias(String paramString1, String paramString2)
-  {
+  void add_alias(String paramString1, String paramString2) {
     this.aliases.put(paramString2, paramString1);
     this.reverse_alias.put(paramString1, paramString2);
   }
 
-  public LocaleTranslator()
-  {
-    this.locales = new Hashtable();
-    this.aliases = new Hashtable();
-    this.reverse_alias = new Hashtable();
+  public LocaleTranslator() {
+    this.locales = new Hashtable<>();
+    this.aliases = new Hashtable<>();
+    this.reverse_alias = new Hashtable<>();
 
     String str2 = null;
 
 
 
-    this.locales.put("en_US", new Hashtable());
+    this.locales.put("en_US", new Hashtable<Character, String>());
     add_alias("en_US", "English (United States)");
 
     add_locale("en_GB", this.british + this.euro1, "English (United Kingdom)");
@@ -287,33 +230,28 @@ class LocaleTranslator
     }
   }
 
-  public int selectLocale(String paramString)
-  {
-    String str = (String)this.aliases.get(paramString);
+  public int selectLocale(String paramString) {
+    String str = this.aliases.get(paramString);
     if (str != null) {
       paramString = str;
     }
-    this.selected = ((Hashtable)this.locales.get(paramString));
-    this.selected_name = ((String)this.reverse_alias.get(paramString));
+    this.selected = this.locales.get(paramString);
+    this.selected_name = this.reverse_alias.get(paramString);
     return this.selected != null ? 0 : -1;
   }
 
 
-  public String translate(char paramChar)
-  {
-    Character localCharacter = new Character(paramChar);
+  public String translate(char paramChar) {
     String str = null;
 
     if (this.selected != null) {
-      str = (String)this.selected.get(localCharacter);
+      str = this.selected.get(paramChar);
     }
 
-
-    return str == null ? localCharacter.toString() : str;
+    return str == null ? Character.toString(paramChar) : str;
   }
 
-  public String[] getLocales()
-  {
+  public String[] getLocales() {
     int i = this.aliases.size();
     String[] arrayOfString = new String[i];
 
@@ -336,8 +274,7 @@ class LocaleTranslator
     return arrayOfString;
   }
 
-  public String getSelected()
-  {
+  public String getSelected() {
     return this.selected_name;
   }
 }
