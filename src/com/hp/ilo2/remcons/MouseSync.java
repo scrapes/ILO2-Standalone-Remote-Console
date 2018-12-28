@@ -115,8 +115,13 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
         stateMachine(CMD_SERVER_MOVE, null, paramInt1, paramInt2);
     }
 
-    void serverScreen(int paramInt1, int paramInt2) {
-        stateMachine(CMD_SERVER_SCREEN, null, paramInt1, paramInt2);
+    void serverScreen(int paramX, int paramY) {
+        stateMachine(CMD_SERVER_SCREEN, null, paramX, paramY);
+    }
+
+    void setServerScreenDimensions(int height, int width) {
+        this.server_h = height;
+        this.server_w = width;
     }
 
     void serverDisabled() {
@@ -409,20 +414,20 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
     }
 
 
-    private void stateMachine(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
+    private void stateMachine(int command, MouseEvent mouseEvent, int paramX, int paramY) {
         synchronized (this.mutex) {
             switch (this.state) {
                 case INIT:
-                    stateInit(command, mouseEvent, paramInt2, paramInt3);
+                    stateInit(command, mouseEvent, paramX, paramY);
                     break;
                 case SYNC:
-                    stateSync(command, mouseEvent, paramInt2, paramInt3);
+                    stateSync(command, mouseEvent, paramX, paramY);
                     break;
                 case ENABLE:
-                    stateEnable(command, mouseEvent, paramInt2, paramInt3);
+                    stateEnable(command, mouseEvent, paramX, paramY);
                     break;
                 case DISABLE:
-                    stateDisable(command, mouseEvent, paramInt2, paramInt3);
+                    stateDisable(command, mouseEvent, paramX, paramY);
                     break;
             }
         }
@@ -480,8 +485,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 }
                 break;
             case CMD_SERVER_SCREEN:
-                this.server_w = paramInt2;
-                this.server_h = paramInt3;
+                setServerScreenDimensions(paramInt2, paramInt3);
                 break;
             case CMD_SERVER_DISABLE:
                 goState(State.DISABLE);
@@ -500,7 +504,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
     }
 
 
-    private void stateEnable(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
+    private void stateEnable(int command, MouseEvent mouseEvent, int paramX, int paramY) {
         switch (command) {
             case CMD_START:
                 if (this.debugMsgEnabled) {
@@ -521,19 +525,18 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
 
             case CMD_SERVER_MOVE:
                 if (this.debugMsgEnabled) {
-                    System.out.println("Server:" + paramInt2 + "," + paramInt3);
+                    System.out.println("Server:" + paramX + "," + paramY);
                 }
-                if ((paramInt2 > 2000) || (paramInt3 > 2000)) {
+                if ((paramX > 2000) || (paramY > 2000)) {
                     goState(State.DISABLE);
                 } else {
-                    this.server_x = paramInt2;
-                    this.server_y = paramInt3;
+                    this.server_x = paramX;
+                    this.server_y = paramY;
                 }
                 break;
 
             case CMD_SERVER_SCREEN:
-                this.server_w = paramInt2;
-                this.server_h = paramInt3;
+                setServerScreenDimensions(paramX, paramY);
                 break;
 
             case CMD_SERVER_DISABLE:
@@ -651,8 +654,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
 
                 break;
             case CMD_SERVER_SCREEN:
-                this.server_w = paramInt2;
-                this.server_h = paramInt3;
+                setServerScreenDimensions(paramInt2, paramInt3);
                 break;
             case CMD_SERVER_DISABLE:
                 break;
