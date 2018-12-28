@@ -87,39 +87,39 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
         stateMachine(CMD_START, null, 0, 0);
     }
 
-    public void setListener(MouseSyncListener listener) {
+    void setListener(MouseSyncListener listener) {
         this.listener = listener;
     }
 
-    public void enableDebug() {
+    void enableDebug() {
         this.debugMsgEnabled = true;
     }
 
-    public void disableDebug() {
+    void disableDebug() {
         this.debugMsgEnabled = false;
     }
 
-    public void restart() {
+    void restart() {
         goState(STATE_INIT);
     }
 
-    public void align() {
+    void align() {
         stateMachine(CMD_ALIGN, null, 0, 0);
     }
 
-    public void sync() {
+    void sync() {
         stateMachine(CMD_SYNC, null, 0, 0);
     }
 
-    public void serverMoved(int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
+    void serverMoved(int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
         stateMachine(CMD_SERVER_MOVE, null, paramInt1, paramInt2);
     }
 
-    public void serverScreen(int paramInt1, int paramInt2) {
+    void serverScreen(int paramInt1, int paramInt2) {
         stateMachine(CMD_SERVER_SCREEN, null, paramInt1, paramInt2);
     }
 
-    public void serverDisabled() {
+    void serverDisabled() {
         stateMachine(CMD_SERVER_DISABLE, null, 0, 0);
     }
 
@@ -211,7 +211,6 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
     private void syncUpdate(int paramInt1, int paramInt2) {
         this.timer.pause();
 
-
         int i = paramInt1 - this.server_x;
         int j = this.server_y - paramInt2;
 
@@ -224,7 +223,6 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
         if (j < 0) {
             j = -j;
         }
-
 
         if (this.send_dx_index >= 0) {
             if (this.recv_dx[this.send_dx_index] == i) {
@@ -417,19 +415,16 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 case STATE_INIT:
                     stateInit(command, mouseEvent, paramInt2, paramInt3);
                     break;
-
                 case STATE_SYNC:
                     stateSync(command, mouseEvent, paramInt2, paramInt3);
                     break;
-
                 case STATE_ENABLE:
                     stateEnable(command, mouseEvent, paramInt2, paramInt3);
                     break;
-
                 case STATE_DISABLE:
                     stateDisable(command, mouseEvent, paramInt2, paramInt3);
+                    break;
             }
-
         }
     }
 
@@ -598,7 +593,6 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 }
                 this.dragging = true;
                 break;
-
             case CMD_MOVE:
                 if ((mouseEvent.getModifiers() & InputEvent.CTRL_MASK) == 0) {
                     this.client_dx += mouseEvent.getX() - this.client_x;
@@ -613,39 +607,14 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
 
                 break;
             case CMD_PRESS:
-                if (this.pressed_button == 0) {
-                    if ((mouseEvent.getModifiers() & 0x4) != 0) {
-                        this.pressed_button = MOUSE_BUTTON_RIGHT;
-                    } else if ((mouseEvent.getModifiers() & 0x8) != 0) {
-                        this.pressed_button = MOUSE_BUTTON_CENTER;
-                    } else {
-                        this.pressed_button = MOUSE_BUTTON_LEFT;
-                    }
-                    this.dragging = false;
-                }
-
-
+                handleCmdPress(mouseEvent);
                 break;
             case CMD_RELEASE:
-                if (this.pressed_button == -MOUSE_BUTTON_LEFT) {
-                    this.listener.serverRelease(MOUSE_BUTTON_LEFT);
-                } else if (this.pressed_button == -MOUSE_BUTTON_CENTER) {
-                    this.listener.serverRelease(MOUSE_BUTTON_CENTER);
-                } else if (this.pressed_button == -MOUSE_BUTTON_RIGHT) {
-                    this.listener.serverRelease(MOUSE_BUTTON_RIGHT);
-                }
+                handleCmdRelease();
                 this.pressed_button = 0;
                 break;
             case CMD_CLICK:
-                if (!this.dragging) {
-                    if ((mouseEvent.getModifiers() & 0x10) != 0) {
-                        this.listener.serverClick(MOUSE_BUTTON_LEFT, 1);
-                    } else if ((mouseEvent.getModifiers() & 0x8) != 0) {
-                        this.listener.serverClick(MOUSE_BUTTON_CENTER, 1);
-                    } else if ((mouseEvent.getModifiers() & 0x4) != 0) {
-                        this.listener.serverClick(MOUSE_BUTTON_RIGHT, 1);
-                    }
-                }
+                handleCmdClick(mouseEvent);
                 break;
         }
     }
@@ -680,16 +649,13 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                     goState(STATE_ENABLE);
                 }
 
-
                 break;
             case CMD_SERVER_SCREEN:
                 this.server_w = paramInt2;
                 this.server_h = paramInt3;
                 break;
-
             case CMD_SERVER_DISABLE:
                 break;
-
             case CMD_ALIGN:
                 this.client_dx = (this.client_x - this.server_x);
                 this.client_dy = (this.server_y - this.client_y);
@@ -723,7 +689,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 }
                 break;
             case CMD_DRAG:
-                if (this.pressed_button != 1) {
+                if (this.pressed_button != MOUSE_BUTTON_RIGHT) {
                     if (this.pressed_button > 0) {
                         this.pressed_button = (-this.pressed_button);
                         this.listener.serverPress(this.pressed_button);
@@ -758,38 +724,50 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 }
                 break;
             case CMD_PRESS:
-                if (this.pressed_button == 0) {
-                    if ((mouseEvent.getModifiers() & 0x4) != 0) {
-                        this.pressed_button = MOUSE_BUTTON_RIGHT;
-                    } else if ((mouseEvent.getModifiers() & 0x8) != 0) {
-                        this.pressed_button = MOUSE_BUTTON_CENTER;
-                    } else {
-                        this.pressed_button = MOUSE_BUTTON_LEFT;
-                    }
-                    this.dragging = false;
-                }
+                handleCmdPress(mouseEvent);
                 break;
             case CMD_RELEASE:
-                if (this.pressed_button == -MOUSE_BUTTON_LEFT) {
-                    this.listener.serverRelease(MOUSE_BUTTON_LEFT);
-                } else if (this.pressed_button == -MOUSE_BUTTON_CENTER) {
-                    this.listener.serverRelease(MOUSE_BUTTON_CENTER);
-                } else if (this.pressed_button == -MOUSE_BUTTON_RIGHT) {
-                    this.listener.serverRelease(MOUSE_BUTTON_RIGHT);
-                }
+                handleCmdRelease();
                 this.pressed_button = 0;
                 break;
             case CMD_CLICK:
-                if (!this.dragging) {
-                    if ((mouseEvent.getModifiers() & 0x10) != 0) {
-                        this.listener.serverClick(MOUSE_BUTTON_LEFT, 1);
-                    } else if ((mouseEvent.getModifiers() & 0x8) != 0) {
-                        this.listener.serverClick(MOUSE_BUTTON_CENTER, 1);
-                    } else if ((mouseEvent.getModifiers() & 0x4) != 0) {
-                        this.listener.serverClick(MOUSE_BUTTON_RIGHT, 1);
-                    }
-                }
+                handleCmdClick(mouseEvent);
                 break;
+        }
+    }
+
+    private void handleCmdPress(MouseEvent mouseEvent) {
+        if (this.pressed_button == 0) {
+            if ((mouseEvent.getModifiers() & 0x4) != 0) {
+                this.pressed_button = MOUSE_BUTTON_RIGHT;
+            } else if ((mouseEvent.getModifiers() & 0x8) != 0) {
+                this.pressed_button = MOUSE_BUTTON_CENTER;
+            } else {
+                this.pressed_button = MOUSE_BUTTON_LEFT;
+            }
+            this.dragging = false;
+        }
+    }
+
+    private void handleCmdRelease() {
+        if (this.pressed_button == -MOUSE_BUTTON_LEFT) {
+            this.listener.serverRelease(MOUSE_BUTTON_LEFT);
+        } else if (this.pressed_button == -MOUSE_BUTTON_CENTER) {
+            this.listener.serverRelease(MOUSE_BUTTON_CENTER);
+        } else if (this.pressed_button == -MOUSE_BUTTON_RIGHT) {
+            this.listener.serverRelease(MOUSE_BUTTON_RIGHT);
+        }
+    }
+
+    private void handleCmdClick(MouseEvent mouseEvent) {
+        if (!this.dragging) {
+            if ((mouseEvent.getModifiers() & 0x10) != 0) {
+                this.listener.serverClick(MOUSE_BUTTON_LEFT, 1);
+            } else if ((mouseEvent.getModifiers() & 0x8) != 0) {
+                this.listener.serverClick(MOUSE_BUTTON_CENTER, 1);
+            } else if ((mouseEvent.getModifiers() & 0x4) != 0) {
+                this.listener.serverClick(MOUSE_BUTTON_RIGHT, 1);
+            }
         }
     }
 }
