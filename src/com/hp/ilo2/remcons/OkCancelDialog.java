@@ -65,12 +65,11 @@ public class OkCancelDialog extends java.awt.Dialog implements ActionListener, W
         setVisible(true);
     }
 
-
-    public void actionPerformed(ActionEvent paramActionEvent) {
-        if (paramActionEvent.getSource() == this.ok) {
+    public void actionPerformed(ActionEvent event) {
+        if (event.getSource() == this.ok) {
             dispose();
             this.rc = true;
-        } else if (paramActionEvent.getSource() == this.cancel) {
+        } else if (event.getSource() == this.cancel) {
             dispose();
             this.rc = false;
         }
@@ -85,20 +84,20 @@ public class OkCancelDialog extends java.awt.Dialog implements ActionListener, W
         this.txt.repaint();
     }
 
-    public void windowClosing(WindowEvent paramWindowEvent) {
+    public void windowClosing(WindowEvent event) {
         dispose();
         this.rc = false;
     }
 
-    public void windowOpened(WindowEvent paramWindowEvent) {}
+    public void windowOpened(WindowEvent event) {}
 
-    public void windowDeiconified(WindowEvent paramWindowEvent) {}
+    public void windowDeiconified(WindowEvent event) {}
 
-    public void windowIconified(WindowEvent paramWindowEvent) {}
+    public void windowIconified(WindowEvent event) {}
 
-    public void windowActivated(WindowEvent paramWindowEvent) {}
+    public void windowActivated(WindowEvent event) {}
 
-    public void windowClosed(WindowEvent paramWindowEvent) {}
+    public void windowClosed(WindowEvent event) {}
 
-    public void windowDeactivated(WindowEvent paramWindowEvent) {}
+    public void windowDeactivated(WindowEvent event) {}
 }
