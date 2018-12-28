@@ -2,9 +2,7 @@ package com.hp.ilo2.remcons;
 
 import java.util.Date;
 
-class Timer
-  implements Runnable
-{
+class Timer implements Runnable {
   enum State {
     INIT, RUNNING, PAUSED, STOPPED
   }
@@ -20,27 +18,24 @@ class Timer
 
   private TimerListener callback;
 
-  private Object callback_info;
+  private Object callbackInfo;
 
   private final Object mutex;
 
-  public Timer(int timeoutMax, boolean isOneShot, Object mutex)
-  {
+  public Timer(int timeoutMax, boolean isOneShot, Object mutex) {
     this.timeout_max = timeoutMax;
     this.one_shot = isOneShot;
     this.mutex = mutex;
   }
 
-  public void setListener(TimerListener listener, Object callbackInfo)
-  {
+  public void setListener(TimerListener listener, Object callbackInfo) {
     synchronized (this.mutex) {
       this.callback = listener;
-      this.callback_info = callbackInfo;
+      this.callbackInfo = callbackInfo;
     }
   }
 
-  public void start()
-  {
+  public void start() {
     synchronized (this.mutex) {
       switch (this.state) {
         case INIT:
@@ -62,8 +57,7 @@ class Timer
     }
   }
 
-  public void stop()
-  {
+  public void stop() {
     synchronized (this.mutex) {
       if (this.state != State.INIT) {
         this.state = State.STOPPED;
@@ -71,8 +65,7 @@ class Timer
     }
   }
 
-  public void pause()
-  {
+  public void pause() {
     synchronized (this.mutex) {
       if (this.state == State.RUNNING) {
         this.state = State.PAUSED;
@@ -80,8 +73,7 @@ class Timer
     }
   }
 
-  public void cont()
-  {
+  public void cont() {
     synchronized (this.mutex) {
       if (this.state == State.PAUSED) {
         this.state = State.RUNNING;
@@ -89,8 +81,7 @@ class Timer
     }
   }
 
-  public void run()
-  {
+  public void run() {
     do {
       Date date = new Date();
       this.start_time_millis = date.getTime();
@@ -104,8 +95,7 @@ class Timer
     } while (process_state());
   }
 
-  private boolean process_state()
-  {
+  private boolean process_state() {
     boolean shouldStop = true;
 
     synchronized (this.mutex) {
@@ -122,7 +112,7 @@ class Timer
         if (this.timeout_count >= this.timeout_max)
         {
           if (this.callback != null) {
-            this.callback.timeout(this.callback_info);
+            this.callback.timeout(this.callbackInfo);
           }
           if (this.one_shot) {
             this.state = State.INIT;
@@ -145,8 +135,3 @@ class Timer
     return shouldStop;
   }
 }
-
-/* Location:              C:\Users\anton\Documents\ILO2\rc175p10.jar!\com\hp\ilo2\remcons\Timer.class
- * Java compiler version: 4 (48.0)
- * JD-Core Version:       0.7.1
- */
