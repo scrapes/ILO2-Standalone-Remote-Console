@@ -1,8 +1,6 @@
 package com.hp.ilo2.remcons;
 
-import java.awt.BorderLayout;
-import java.awt.Panel;
-import java.awt.TextField;
+import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -13,21 +11,16 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.io.PrintStream;
-import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Properties;
 
 
-public class telnet
-  extends Panel
-  implements Runnable, MouseListener, FocusListener, KeyListener
-{
-    public static final int TELNET_PORT = 23;
-    public static final int TELNET_ENCRYPT = 192;
+public class telnet extends Panel implements Runnable, MouseListener, FocusListener, KeyListener {
+    private static final int TELNET_PORT = 23;
+
+    public static final int TELNET_ENCRYPT = 0xc0;
     public static final int TELNET_CHG_ENCRYPT_KEYS = 193;
     public static final int TELNET_SE = 240;
     public static final int TELNET_NOP = 241;
@@ -45,57 +38,30 @@ public class telnet
     public static final int TELNET_DO = 253;
     public static final int TELNET_DONT = 254;
     public static final int TELNET_IAC = 255;
+
     private static final int CMD_TS_AVAIL = 194;
     private static final int CMD_TS_NOT_AVAIL = 195;
     private static final int CMD_TS_STARTED = 196;
     private static final int CMD_TS_STOPPED = 197;
-    protected dvcwin screen;
-    protected TextField status_box;
-    protected Thread receiver;
-    protected Socket s;
-    protected DataInputStream in;
+
+    dvcwin screen;
+
+    private TextField statusBox;
+    private String[] statusFields = new String[4];
+
+    private Thread receiver;
+    private Socket s;
+    private DataInputStream in;
     protected DataOutputStream out;
-    protected String login = "";
+    private String login = "";
 
+    private String host = "";
+    private int port = TELNET_PORT;
 
-    protected String host = "";
-
-
-    protected int port = 23;
-
-
-    protected int connected = 0;
-
-
-    protected int fore;
-
-
-    protected int back;
-
-
-    protected int hi_fore;
-
-
-    protected int hi_back;
-
-
-    protected String escseq;
-
-
-    protected String curr_num;
-
-
-    protected int[] escseq_val = new int[10];
-
-
-    protected int escseq_val_count = 0;
-
-    private boolean crlf_enabled = false;
-
-    public boolean mirror = false;
+    private int connected = 0;
 
     private RC4 RC4decrypter;
-    protected byte[] decrypt_key = new byte[16];
+    private byte[] decrypt_key = new byte[16];
     private boolean decryption_active = false;
     protected boolean encryption_enabled = false;
     private Process rdpProc = null;
@@ -103,25 +69,18 @@ public class telnet
     private int terminalServicesPort = 3389;
 
     int ts_type;
-    private boolean tbm_mode = false;
     private boolean dvc_mode = false;
     private boolean dvc_encryption = false;
-    private int total_count = 0;
-
-    private String st_fld1 = "";
-    private String st_fld2 = "";
-    private String st_fld3 = "";
-    private String st_fld4 = "";
 
     private boolean seized = false;
 
-    LocaleTranslator translator = new LocaleTranslator();
+    private LocaleTranslator translator = new LocaleTranslator();
 
     public telnet() {
-        this.status_box = new TextField(60);
+        this.statusBox = new TextField(60);
 
         this.screen = new dvcwin(1600, 1200);
-        this.status_box.setEditable(false);
+        this.statusBox.setEditable(false);
 
         this.screen.addMouseListener(this);
 
@@ -135,7 +94,7 @@ public class telnet
 
 
         setLayout(new BorderLayout());
-        add("South", this.status_box);
+        add("South", this.statusBox);
         add("North", this.screen);
 
         set_status(1, "Offline");
@@ -154,12 +113,10 @@ public class telnet
         this.translator.selectLocale(paramString);
     }
 
-    public void enable_debug() {
-    }
+    public void enable_debug() {}
 
 
-    public void disable_debug() {
-    }
+    public void disable_debug() {}
 
 
     public void startRdp() {
@@ -182,15 +139,14 @@ public class telnet
                 System.out.println("exec: " + str2);
                 try {
                     this.rdpProc = localRuntime.exec(str2);
-                    transmit("ÿÄ");
-                } catch (SecurityException localSecurityException1) {
-                    System.out.println("SecurityException: " + localSecurityException1.getMessage() + ":: Attempting to launch " + str2);
-                } catch (IOException localIOException1) {
-                    System.out.println("IOException: " + localIOException1.getMessage() + ":: " + str2);
+                    transmit("" + TELNET_IAC + CMD_TS_STARTED);
+                } catch (SecurityException e) {
+                    System.out.println("SecurityException: " + e.getMessage() + ":: Attempting to launch " + str2);
+                } catch (IOException e) {
+                    System.out.println("IOException: " + e.getMessage() + ":: " + str2);
                 }
                 return;
             }
-
 
             boolean i = false;
             try {
@@ -199,11 +155,11 @@ public class telnet
                 this.rdpProc = localRuntime.exec("mstsc /f /console /v:" + this.host + ":" + this.terminalServicesPort);
 
 
-                transmit("ÿÄ");
-            } catch (SecurityException localSecurityException2) {
-                System.out.println("SecurityException: " + localSecurityException2.getMessage() + ":: Attempting to launch mstsc.");
-            } catch (IOException localIOException2) {
-                System.out.println("IOException: " + localIOException2.getMessage() + ":: mstsc not found in system directory. Looking in \\Program Files\\Remote Desktop.");
+                transmit("" + TELNET_IAC + CMD_TS_STARTED);
+            } catch (SecurityException e) {
+                System.out.println("SecurityException: " + e.getMessage() + ":: Attempting to launch mstsc.");
+            } catch (IOException e) {
+                System.out.println("IOException: " + e.getMessage() + ":: mstsc not found in system directory. Looking in \\Program Files\\Remote Desktop.");
                 i = true;
             }
             String[] arrayOfString;
@@ -214,11 +170,11 @@ public class telnet
                     this.rdpProc = localRuntime.exec(arrayOfString);
 
 
-                    transmit("ÿÄ");
-                } catch (SecurityException localSecurityException3) {
-                    System.out.println("SecurityException: " + localSecurityException3.getMessage() + ":: Attempting to launch mstsc.");
-                } catch (IOException localIOException3) {
-                    System.out.println("IOException: " + localIOException3.getMessage() + ":: Unable to find mstsc. Verify that Terminal Services client is installed.");
+                    transmit("" + TELNET_IAC + CMD_TS_STARTED);
+                } catch (SecurityException e) {
+                    System.out.println("SecurityException: " + e.getMessage() + ":: Attempting to launch mstsc.");
+                } catch (IOException e) {
+                    System.out.println("IOException: " + e.getMessage() + ":: Unable to find mstsc. Verify that Terminal Services client is installed.");
                     i = true;
                 }
             }
@@ -228,34 +184,34 @@ public class telnet
                     this.rdpProc = localRuntime.exec(arrayOfString);
 
 
-                    transmit("ÿÄ");
-                } catch (SecurityException localSecurityException4) {
-                    System.out.println("SecurityException: " + localSecurityException4.getMessage() + ":: Attempting to launch mstsc.");
-                } catch (IOException localIOException4) {
-                    System.out.println("IOException: " + localIOException4.getMessage() + ":: Unable to find mstsc. Verify that Terminal Services client is installed.");
+                    transmit("" + TELNET_IAC + CMD_TS_STARTED);
+                } catch (SecurityException e) {
+                    System.out.println("SecurityException: " + e.getMessage() + ":: Attempting to launch mstsc.");
+                } catch (IOException e) {
+                    System.out.println("IOException: " + e.getMessage() + ":: Unable to find mstsc. Verify that Terminal Services client is installed.");
                 }
             }
         }
     }
 
 
-    public void keyTyped(KeyEvent paramKeyEvent) {
-        transmit(translate_key(paramKeyEvent));
+    public void keyTyped(KeyEvent event) {
+        transmit(translate_key(event));
     }
 
 
-    public void keyPressed(KeyEvent paramKeyEvent) {
-        transmit(translate_special_key(paramKeyEvent));
+    public void keyPressed(KeyEvent event) {
+        transmit(translate_special_key(event));
     }
 
 
-    public void keyReleased(KeyEvent paramKeyEvent) {
-        transmit(translate_special_key_release(paramKeyEvent));
+    public void keyReleased(KeyEvent event) {
+        transmit(translate_special_key_release(event));
     }
 
 
     public void send_auto_alive_msg() {
-        transmit("\033[&");
+        transmit("" + "\033[&");
     }
 
 
@@ -298,22 +254,10 @@ public class telnet
     }
 
 
-    public synchronized void set_status(int paramInt, String paramString) {
-        switch (paramInt) {
-            case 1:
-                this.st_fld1 = paramString;
-                break;
-            case 2:
-                this.st_fld2 = paramString;
-                break;
-            case 3:
-                this.st_fld3 = paramString;
-                break;
-            case 4:
-                this.st_fld4 = paramString;
-        }
+    public synchronized void set_status(int fieldIndex, String message) {
+        this.statusFields[fieldIndex] = message;
 
-        this.status_box.setText(this.st_fld1 + " " + this.st_fld2 + " " + this.st_fld3 + " " + this.st_fld4);
+        this.statusBox.setText(this.statusFields[0] + " " + this.statusFields[1] + " " + this.statusFields[2] + " " + this.statusFields[3]);
     }
 
 
@@ -351,8 +295,8 @@ public class telnet
                 this.s = new Socket(this.host, this.port);
                 try {
                     this.s.setSoLinger(true, 0);
-                } catch (SocketException localSocketException1) {
-                    System.out.println("telnet.connect() linger SocketException: " + localSocketException1);
+                } catch (SocketException e) {
+                    System.out.println("telnet.connect() linger SocketException: " + e);
                 }
 
                 this.in = new DataInputStream(this.s.getInputStream());
@@ -366,34 +310,28 @@ public class telnet
                 this.receiver.start();
 
                 transmit(this.login);
-            } catch (SocketException localSocketException2) {
-                System.out.println("telnet.connect() SocketException: " + localSocketException2);
-                set_status(1, localSocketException2.toString());
-                this.s = null;
-                this.in = null;
-                this.out = null;
-                this.receiver = null;
-                this.connected = 0;
-            } catch (UnknownHostException localUnknownHostException) {
-                System.out.println("telnet.connect() UnknownHostException: " + localUnknownHostException);
-                set_status(1, localUnknownHostException.toString());
-                this.s = null;
-                this.in = null;
-                this.out = null;
-                this.receiver = null;
-                this.connected = 0;
-            } catch (IOException localIOException) {
-                System.out.println("telnet.connect() IOException: " + localIOException);
-                set_status(1, localIOException.toString());
-                this.s = null;
-                this.in = null;
-                this.out = null;
-                this.receiver = null;
-                this.connected = 0;
+            } catch (SocketException e) {
+                System.out.println("telnet.connect() SocketException: " + e);
+                setErrorStatus(e.toString());
+            } catch (UnknownHostException e) {
+                System.out.println("telnet.connect() UnknownHostException: " + e);
+                setErrorStatus(e.toString());
+            } catch (IOException e) {
+                System.out.println("telnet.connect() IOException: " + e);
+                setErrorStatus(e.toString());
             }
         } else {
             requestFocus();
         }
+    }
+
+    private void setErrorStatus(String s) {
+        set_status(1, s);
+        this.s = null;
+        this.in = null;
+        this.out = null;
+        this.receiver = null;
+        this.connected = 0;
     }
 
 
@@ -457,13 +395,13 @@ public class telnet
     }
 
 
-    protected synchronized String translate_key(KeyEvent paramKeyEvent) {
-        char c = paramKeyEvent.getKeyChar();
+    protected synchronized String translate_key(KeyEvent keyEvent) {
+        char c = keyEvent.getKeyChar();
         String str;
         switch (c) {
             case '\n':
             case '\r':
-                if (paramKeyEvent.isShiftDown()) {
+                if (keyEvent.isShiftDown()) {
                     str = "\n";
                 } else {
                     str = "\r";
@@ -473,7 +411,7 @@ public class telnet
             case '\t':
                 str = "";
                 break;
-            case '\013':
+            case 11:
             case '\f':
             default:
                 str = this.translator.translate(c);
@@ -486,20 +424,16 @@ public class telnet
     protected synchronized String translate_special_key(KeyEvent paramKeyEvent) {
         String str = "";
 
-        switch (paramKeyEvent.getKeyCode()) {
-            case 9:
-                paramKeyEvent.consume();
-                str = "\t";
+        if (paramKeyEvent.getKeyCode() == '\t') {
+            paramKeyEvent.consume();
+            str = "\t";
         }
-
-
         return str;
     }
 
 
     protected synchronized String translate_special_key_release(KeyEvent paramKeyEvent) {
-        String str = "";
-        return str;
+        return "";
     }
 
 
@@ -513,12 +447,12 @@ public class telnet
         int j = 0;
         int k = 0;
         int m = 0;
-        byte[] arrayOfByte = new byte['Ѐ'];
+        byte[] arrayOfByte = new byte[1024];
 
 
         this.screen.show_text("Connecting");
         try {
-            for (; ; ) {
+            while (true) {
                 if (this.rdpProc != null) {
                     try {
                         this.rdpProc.exitValue();
@@ -526,9 +460,8 @@ public class telnet
                         this.rdpProc = null;
 
 
-                        transmit("ÿÅ");
-                    } catch (IllegalThreadStateException localIllegalThreadStateException) {
-                    }
+                        transmit("" + TELNET_IAC + CMD_TS_STOPPED);
+                    } catch (IllegalThreadStateException ignored) {}
                 }
 
 
@@ -542,11 +475,11 @@ public class telnet
                     this.s.setSoTimeout(1000);
                     n = this.in.read(arrayOfByte);
 
-                } catch (InterruptedIOException localInterruptedIOException) {
+                } catch (InterruptedIOException e) {
                     continue;
-                } catch (Exception localException2) {
-                    System.out.println("telnet.run().read Exception, class:" + localException2.getClass() + "  msg:" + localException2.getMessage());
-                    localException2.printStackTrace();
+                } catch (Exception e) {
+                    System.out.println("telnet.run().read Exception, class:" + e.getClass() + "  msg:" + e.getMessage());
+                    e.printStackTrace();
                     n = -1;
                 }
 
@@ -560,8 +493,6 @@ public class telnet
                     c1 = (char) (c1 & 0xFF);
 
                     if (this.dvc_mode) {
-
-
                         if (this.dvc_encryption) {
                             char c2 = (char) (this.RC4decrypter.randomValue() & 0xFF);
                             c1 = (char) (c1 ^ c2);
@@ -572,11 +503,10 @@ public class telnet
                         if (!this.dvc_mode) {
                             System.out.println("DVC mode turned off");
                             set_status(1, "DVC Mode off at run");
-
                         }
 
 
-                    } else if (c1 == '\033') {
+                    } else if (c1 == 27) {
                         j = 1;
                     } else if ((j == 1) && (c1 == '[')) {
                         j = 2;
@@ -596,12 +526,10 @@ public class telnet
 
                 }
             }
-        } catch (Exception localException1) {
-            System.out.println("telnet.run() Exception, class:" + localException1.getClass() + "  msg:" + localException1.getMessage());
-            localException1.printStackTrace();
-
+        } catch (Exception e) {
+            System.out.println("telnet.run() Exception, class:" + e.getClass() + "  msg:" + e.getMessage());
+            e.printStackTrace();
         } finally {
-
             if (!this.seized) {
                 this.screen.show_text("Offline");
                 set_status(1, "Offline");
@@ -622,19 +550,11 @@ public class telnet
         }
     }
 
-    void focusTraversalKeysDisable(Object paramObject) {
-        Class[] arrayOfClass = {Boolean.TYPE};
-        Object[] arrayOfObject1 = {Boolean.TRUE};
-        Object[] arrayOfObject2 = {Boolean.FALSE};
-        try {
-            paramObject.getClass().getMethod("setFocusTraversalKeysEnabled", arrayOfClass).invoke(paramObject, arrayOfObject2);
-        } catch (Throwable localThrowable1) {
-        }
+    private void focusTraversalKeysDisable(Component paramObject) {
+        paramObject.setFocusTraversalKeysEnabled(false);
 
-        try {
-            paramObject.getClass().getMethod("setFocusCycleRoot", arrayOfClass).invoke(paramObject, arrayOfObject1);
-        } catch (Throwable localThrowable2) {
-        }
+        if (paramObject instanceof Container)
+            ((Container)paramObject).setFocusCycleRoot(true);
     }
 
 
@@ -642,12 +562,13 @@ public class telnet
         if (this.rdpProc != null) {
             try {
                 this.rdpProc.exitValue();
-            } catch (IllegalThreadStateException localIllegalThreadStateException) {
+            } catch (IllegalThreadStateException e) {
                 System.out.println("IllegalThreadStateException thrown. Destroying TS.");
                 this.rdpProc.destroy();
             }
             this.rdpProc = null;
-            transmit("ÿÅ");
+
+            transmit("" + TELNET_IAC + CMD_TS_STOPPED);
         }
         System.out.println("TS stop.");
     }
@@ -665,29 +586,23 @@ public class telnet
 
 
     public String percent_sub(String paramString) {
-        StringBuffer localStringBuffer = new StringBuffer();
+        StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < paramString.length(); i++) {
             char c = paramString.charAt(i);
             if (c == '%') {
                 c = paramString.charAt(++i);
                 if (c == 'h') {
-                    localStringBuffer.append(this.host);
+                    builder.append(this.host);
                 } else if (c == 'p') {
-                    localStringBuffer.append(this.terminalServicesPort);
+                    builder.append(this.terminalServicesPort);
                 } else {
-                    localStringBuffer.append(c);
+                    builder.append(c);
                 }
             } else {
-                localStringBuffer.append(c);
+                builder.append(c);
             }
         }
-        return localStringBuffer.toString();
+        return builder.toString();
     }
 }
-
-
-/* Location:              C:\Users\anton\Documents\ILO2\rc175p10.jar!\com\hp\ilo2\remcons\telnet.class
- * Java compiler version: 4 (48.0)
- * JD-Core Version:       0.7.1
- */
