@@ -7,20 +7,16 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.MemoryImageSource;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.security.NoSuchAlgorithmException;
 
 
-public class cim
-        extends telnet
-        implements MouseSyncListener {
+public class cim extends telnet implements MouseSyncListener {
     public static final int MOUSE_BUTTON_LEFT = 4;
     public static final int MOUSE_BUTTON_CENTER = 2;
     public static final int MOUSE_BUTTON_RIGHT = 1;
-    static final int CMD_ENCRYPT = 192;
+    private static final int CMD_ENCRYPT = 192;
     private static final int CMD_MOUSE_MOVE = 208;
     private static final int CMD_BUTTON_PRESS = 209;
     private static final int CMD_BUTTON_RELEASE = 210;
@@ -80,22 +76,71 @@ public class cim
     private static final int CORP = 46;
     private static final int MODE2 = 47;
     private static final int SIZE_OF_ALL = 48;
-    private static final int B = -16777216;
-    private static final int W = -8355712;
+    private static final int B = 0xff000000;
+    private static final int W = 0xff808080;
+
     private static final byte[] cursor_none = {0};
-    private static final int[] cursor_outline = {-8355712, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, -8355712, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, 0, 0, 0, -8355712, 0, 0, 0, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, -8355712, 0, 0, 0, 0, 0, 0, -8355712, -8355712, -8355712, -8355712, -8355712, -8355712, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, 0, 0, -8355712, 0, 0, 0, -8355712, 0, 0, -8355712, 0, 0, 0, 0, -8355712, 0, 0, -8355712, -8355712, -8355712, 0, 0, -8355712, 0, 0, 0, -8355712, 0, -8355712, 0, 0, -8355712, 0, 0, -8355712, 0, 0, 0, -8355712, -8355712, 0, 0, 0, 0, -8355712, 0, 0, -8355712, 0, 0, -8355712, 0, 0, 0, 0, 0, -8355712, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, 0, 0, -8355712, 0, 0, 0, 0, 0, 0, 0, 0, 0, -8355712, -8355712, 0, 0};
-    private static int[] bits_to_read = {0, 1, 1, 1, 1, 1, 2, 3, 4, 4, 1, 1, 3, 3, 8, 1, 1, 7, 1, 1, 3, 7, 1, 1, 8, 1, 7, 0, 1, 3, 7, 1, 4, 0, 0, 0, 1, 0, 1, 7, 7, 4, 4, 1, 8, 8, 1, 4};
-    private static int[] next_0 = {1, 2, 31, 2, 2, 10, 10, 10, 10, 41, 2, 33, 2, 2, 2, 16, 19, 39, 22, 20, 1, 1, 34, 25, 46, 26, 40, 1, 29, 1, 1, 36, 10, 2, 1, 35, 8, 37, 38, 1, 47, 42, 10, 43, 45, 45, 1, 1};
-    private static int[] next_1 = {1, 15, 3, 11, 11, 10, 10, 10, 10, 41, 11, 12, 2, 2, 2, 17, 18, 39, 23, 21, 1, 1, 28, 24, 46, 27, 40, 1, 30, 1, 1, 35, 10, 2, 1, 35, 9, 37, 38, 1, 47, 42, 10, 0, 45, 45, 24, 1};
+    private static final int[] cursor_outline = {
+            W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            W, W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            W, 0, W, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            W, 0, 0, W, 0, 0, 0, 0, 0, 0, 0, 0,
+            W, 0, 0, 0, W, 0, 0, 0, 0, 0, 0, 0,
+            W, 0, 0, 0, 0, W, 0, 0, 0, 0, 0, 0,
+            W, 0, 0, 0, 0, 0, W, 0, 0, 0, 0, 0,
+            W, 0, 0, 0, 0, 0, 0, W, 0, 0, 0, 0,
+            W, 0, 0, 0, 0, 0, 0, 0, W, 0, 0, 0,
+            W, 0, 0, 0, 0, 0, 0, 0, 0, W, 0, 0,
+            W, 0, 0, 0, 0, 0, 0, 0, 0, 0, W, 0,
+            W, 0, 0, 0, 0, 0, 0, W, W, W, W, W,
+            W, 0, 0, 0, 0, 0, 0, W, 0, 0, 0, 0,
+            W, 0, 0, 0, W, 0, 0, W, 0, 0, 0, 0,
+            W, 0, 0, W, W, W, 0, 0, W, 0, 0, 0,
+            W, 0, W, 0, 0, W, 0, 0, W, 0, 0, 0,
+            W, W, 0, 0, 0, 0, W, 0, 0, W, 0, 0,
+            W, 0, 0, 0, 0, 0, W, 0, 0, W, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, W, 0, 0, W, 0,
+            0, 0, 0, 0, 0, 0, 0, W, 0, 0, W, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, W, W, 0, 0
+    };
+
+    private static int[] bits_to_read = {
+            0, 1, 1, 1, 1, 1, 2, 3,
+            4, 4, 1, 1, 3, 3, 8, 1,
+            1, 7, 1, 1, 3, 7, 1, 1,
+            8, 1, 7, 0, 1, 3, 7, 1,
+            4, 0, 0, 0, 1, 0, 1, 7,
+            7, 4, 4, 1, 8, 8, 1, 4
+    };
+    private static int[] next_0 = {
+            1, 2, 31, 2, 2, 10, 10, 10,
+            10, 41, 2, 33, 2, 2, 2, 16,
+            19, 39, 22, 20, 1, 1, 34, 25,
+            46, 26, 40, 1, 29, 1, 1, 36,
+            10, 2, 1, 35, 8, 37, 38, 1,
+            47, 42, 10, 43, 45, 45, 1, 1
+    };
+    private static int[] next_1 = {
+            1, 15, 3, 11, 11, 10, 10, 10,
+            10, 41, 11, 12, 2, 2, 2, 17, 18, 39, 23, 21, 1, 1, 28, 24, 46, 27, 40, 1, 30, 1, 1, 35, 10, 2, 1, 35, 9, 37, 38, 1, 47, 42, 10, 0, 45, 45, 24, 1
+    };
+
     private static int dvc_cc_active = 0;
     private static int[] dvc_cc_color = new int[17];
     private static int[] dvc_cc_usage = new int[17];
     private static int[] dvc_cc_block = new int[17];
-    private static int[] dvc_lru_lengths = {0, 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4};
-    private static int[] dvc_getmask = {0, 1, 3, 7, 15, 31, 63, 127, 255};
-    private static int[] dvc_reversal = new int['Ā'];
-    private static int[] dvc_left = new int['Ā'];
-    private static int[] dvc_right = new int['Ā'];
+    private static int[] dvc_lru_lengths = {
+            0, 0, 0,
+            1,
+            2, 2,
+            3, 3, 3, 3,
+            4, 4, 4, 4, 4, 4, 4, 4
+    };
+    private static int[] dvc_getmask = {0x0, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f, 0xff};
+    private static int[] dvc_reversal = new int[0x100];
+    private static int[] dvc_left = new int[0x100];
+    private static int[] dvc_right = new int[0x100];
+
     private static int dvc_pixel_count;
     private static int dvc_size_x;
     private static int dvc_size_y;
@@ -113,89 +158,61 @@ public class cim
     private static int dvc_next_state = 0;
     private static int dvc_pixcode = 38;
     private static int dvc_code;
-    private static int[] block = new int['Ā'];
+    private static int[] block = new int[0x100];
     private static int dvc_red;
     private static int dvc_green;
     private static int dvc_blue;
+
     private static int fatal_count;
     private static int printchan = 0;
     private static String printstring = "";
     private static long count_bytes = 0L;
-    private static int[] cmd_p_buff = new int['Ā'];
+    private static int[] cmd_p_buff = new int[0x100];
     private static int cmd_p_count = 0;
     private static int cmd_last = 0;
     private static int framerate = 30;
     private static boolean debug_msgs = false;
-    private static char last_bits = '\000';
-    private static char last_bits2 = '\000';
-    private static char last_bits3 = '\000';
-    private static char last_bits4 = '\000';
-    private static char last_bits5 = '\000';
-    private static char last_bits6 = '\000';
-    private static char last_bits7 = '\000';
-    private static int last_len = 0;
-    private static int last_len1 = 0;
-    private static int last_len2 = 0;
-    private static int last_len3 = 0;
-    private static int last_len4 = 0;
-    private static int last_len5 = 0;
-    private static int last_len6 = 0;
-    private static int last_len7 = 0;
-    private static int last_len8 = 0;
-    private static int last_len9 = 0;
-    private static int last_len10 = 0;
-    private static int last_len11 = 0;
-    private static int last_len12 = 0;
-    private static int last_len13 = 0;
-    private static int last_len14 = 0;
-    private static int last_len15 = 0;
-    private static int last_len16 = 0;
-    private static int last_len17 = 0;
-    private static int last_len18 = 0;
-    private static int last_len19 = 0;
-    private static int last_len20 = 0;
-    private static int last_len21 = 0;
+
     private static char dvc_new_bits = '\000';
     private static int debug_lastx = 0;
     private static int debug_lasty = 0;
     private static int debug_show_block = 0;
     private static long timeout_count = 0L;
-    private static long dvc_counter_block = 0L;
-    private static long dvc_counter_bits = 0L;
-    private static boolean show_bitsblk_count = false;
-    private static long show_slices = 0L;
+
     private static boolean dvc_process_inhibit = false;
     private static boolean video_detected = true;
-    public int[] color_remap_table = new int['က'];
-    public boolean UI_dirty = false;
-    public byte[] encrypt_key = new byte[16];
-    protected MouseSync mouse_sync = new MouseSync(this);
-    protected Cursor current_cursor;
-    private char prev_char = ' ';
+    private int[] color_remap_table = new int[0x1000];
+    boolean UI_dirty = false;
+    private byte[] encryptKey = new byte[16];
+    private MouseSync mouse_sync = new MouseSync(this);
+    private Cursor currentCursor;
+
     private boolean disable_kbd = false;
     private boolean altlock = false;
+
     private int scale_x = 1;
     private int scale_y = 1;
     private int screen_x = 1;
     private int screen_y = 1;
     private int mouse_protocol = 0;
     private boolean sending_encrypt_command = false;
+
     private RC4 RC4encrypter;
-    private boolean encryption_active = false;
+    private boolean encryptionActive = false;
     private int key_index = 0;
-    private boolean ignore_next_key = false;
+    private boolean ignoreNextKey = false;
 
 
     public cim() {
-        dvc_reversal['ÿ'] = 0;
-        this.current_cursor = Cursor.getDefaultCursor();
+        dvc_reversal[0xff] = 0;
+        this.currentCursor = Cursor.getDefaultCursor();
         this.screen.addMouseListener(this.mouse_sync);
         this.screen.addMouseMotionListener(this.mouse_sync);
         this.mouse_sync.setListener(this);
     }
 
     public static String byteToHex(byte paramByte) {
-        StringBuffer localStringBuffer = new StringBuffer();
+        StringBuilder localStringBuffer = new StringBuilder();
         localStringBuffer.append(toHexChar(paramByte >>> 4 & 0xF));
         localStringBuffer.append(toHexChar(paramByte & 0xF));
         return localStringBuffer.toString();
@@ -207,7 +224,7 @@ public class cim
     }
 
     public static String intToHex4(int paramInt) {
-        StringBuffer localStringBuffer = new StringBuffer();
+        StringBuilder localStringBuffer = new StringBuilder();
         localStringBuffer.append(byteToHex((byte) (paramInt / 256)));
         localStringBuffer.append(byteToHex((byte) (paramInt & 0xFF)));
         return localStringBuffer.toString();
@@ -218,7 +235,7 @@ public class cim
         return byteToHex(b);
     }
 
-    public static char toHexChar(int paramInt) {
+    private static char toHexChar(int paramInt) {
         if ((0 <= paramInt) && (paramInt <= 9)) {
             return (char) (48 + paramInt);
         }
@@ -226,21 +243,20 @@ public class cim
         return (char) (65 + (paramInt - 10));
     }
 
-    public void setup_encryption(byte[] paramArrayOfByte, int paramInt) {
-        System.arraycopy(paramArrayOfByte, 0, this.encrypt_key, 0, 16);
+    public void setup_encryption(byte[] key, int keyIndex) {
+        System.arraycopy(key, 0, this.encryptKey, 0, 16);
 
-        this.RC4encrypter = new RC4(paramArrayOfByte);
-        this.key_index = paramInt;
+        this.RC4encrypter = new RC4(key);
+        this.key_index = keyIndex;
     }
 
     public void reinit_vars() {
         super.reinit_vars();
 
-        this.prev_char = ' ';
         this.disable_kbd = false;
         this.altlock = false;
 
-        dvc_reversal['ÿ'] = 0;
+        dvc_reversal[0xff] = 0;
 
         this.scale_x = 1;
         this.scale_y = 1;
@@ -283,29 +299,29 @@ public class cim
             clientX = 3000 * clientX / this.screen_x;
             clientY = 3000 * clientY / this.screen_y;
         } else {
-            clientX = 3000 * clientX / 1;
-            clientY = 3000 * clientY / 1;
+            clientX = 3000 * clientX;
+            clientY = 3000 * clientY;
         }
         char c1 = (char) (clientX / 256);
         char c2 = (char) (clientX % 256);
         char c3 = (char) (clientY / 256);
         char c4 = (char) (clientY % 256);
         if (this.mouse_protocol == 0) {
-            transmit("ÿÐ" + (char) paramInt1 + "" + (char) paramInt2);
+            transmit("" + TELNET_IAC + CMD_MOUSE_MOVE + (char) paramInt1 + "" + (char) paramInt2);
         } else {
-            transmit("ÿÐ" + (char) paramInt1 + "" + (char) paramInt2 + "" + c1 + "" + c2 + "" + c3 + "" + c4);
+            transmit("" + TELNET_IAC + CMD_MOUSE_MOVE + (char) paramInt1 + "" + (char) paramInt2 + "" + c1 + "" + c2 + "" + c3 + "" + c4);
         }
     }
 
-    public void mouse_mode_change(boolean paramBoolean) {
-        char c = paramBoolean ? '\001' : '\002';
-        transmit("ÿÕ" + c);
+    public void mouse_mode_change(boolean absolute) {
+        char mode = absolute ? MOUSE_USBABS : MOUSE_USBREL;
+        transmit("" + TELNET_IAC + CMD_SET_MODE + mode);
     }
 
-    public void mouseEntered(MouseEvent paramMouseEvent) {
+    public void mouseEntered(MouseEvent event) {
         this.UI_dirty = true;
-        setCursor(this.current_cursor);
-        super.mouseEntered(paramMouseEvent);
+        setCursor(this.currentCursor);
+        super.mouseEntered(event);
     }
 
     public void serverPress(int button) {
@@ -348,7 +364,7 @@ public class cim
         char[] arrayOfChar = {'ÿ', 'À'};
 
         if (this.encryption_enabled) {
-            this.encryption_active = true;
+            this.encryptionActive = true;
             paramString2 = "" + arrayOfChar[0] + "" + arrayOfChar[1] + "    " + paramString2;
 
 
@@ -358,51 +374,50 @@ public class cim
         super.connect(paramString1, paramString2, paramInt1, paramInt2, paramInt3);
     }
 
-    public synchronized void transmit(String paramString) {
+    public synchronized void transmit(String data) {
         if (this.out == null) {
             return;
         }
-        if (paramString.length() != 0) {
-            byte[] arrayOfByte = new byte[paramString.length()];
+        if (data.length() != 0) {
+            byte[] arrayOfByte = new byte[data.length()];
 
             int i;
 
-            if (this.encryption_active) {
+            if (this.encryptionActive) {
                 if (this.sending_encrypt_command) {
-                    arrayOfByte[0] = ((byte) paramString.charAt(0));
-                    arrayOfByte[1] = ((byte) paramString.charAt(1));
+                    arrayOfByte[0] = ((byte) data.charAt(0));
+                    arrayOfByte[1] = ((byte) data.charAt(1));
                     arrayOfByte[2] = ((byte) ((this.key_index & 0xFF000000) >>> 24));
                     arrayOfByte[3] = ((byte) ((this.key_index & 0xFF0000) >>> 16));
                     arrayOfByte[4] = ((byte) ((this.key_index & 0xFF00) >>> 8));
                     arrayOfByte[5] = ((byte) ((this.key_index & 0xFF) >>> 0));
 
 
-                    for (i = 6; i < paramString.length(); i++) {
-                        arrayOfByte[i] = ((byte) (paramString.charAt(i) ^ this.RC4encrypter.randomValue()));
+                    for (i = 6; i < data.length(); i++) {
+                        arrayOfByte[i] = ((byte) (data.charAt(i) ^ this.RC4encrypter.randomValue()));
                     }
                     this.sending_encrypt_command = false;
                 } else {
-                    for (i = 0; i < paramString.length(); i++) {
-                        arrayOfByte[i] = ((byte) (paramString.charAt(i) ^ this.RC4encrypter.randomValue()));
+                    for (i = 0; i < data.length(); i++) {
+                        arrayOfByte[i] = ((byte) (data.charAt(i) ^ this.RC4encrypter.randomValue()));
                     }
 
                 }
             } else {
-                for (i = 0; i < paramString.length(); i++) {
-                    arrayOfByte[i] = ((byte) paramString.charAt(i));
+                for (i = 0; i < data.length(); i++) {
+                    arrayOfByte[i] = ((byte) data.charAt(i));
                 }
             }
 
             try {
                 this.out.write(arrayOfByte, 0, arrayOfByte.length);
-            } catch (IOException localIOException) {
-            }
+            } catch (IOException ignored) {}
         }
     }
 
-    protected String translate_key(KeyEvent paramKeyEvent) {
+    protected String translate_key(KeyEvent keyEvent) {
         String str = "";
-        int i = paramKeyEvent.getKeyChar();
+        char i = keyEvent.getKeyChar();
         int j = 0;
         int k = 1;
 
@@ -410,32 +425,32 @@ public class cim
             return "";
         }
 
-        if (this.ignore_next_key) {
-            this.ignore_next_key = false;
+        if (this.ignoreNextKey) {
+            this.ignoreNextKey = false;
             return "";
         }
 
         this.UI_dirty = true;
-        if (paramKeyEvent.isShiftDown()) {
+        if (keyEvent.isShiftDown()) {
             j = 1;
-        } else if (paramKeyEvent.isControlDown()) {
+        } else if (keyEvent.isControlDown()) {
             j = 2;
-        } else if ((this.altlock) || (paramKeyEvent.isAltDown())) {
+        } else if ((this.altlock) || (keyEvent.isAltDown())) {
             j = 3;
-            if (paramKeyEvent.isAltDown()) {
-                paramKeyEvent.consume();
+            if (keyEvent.isAltDown()) {
+                keyEvent.consume();
             }
         }
 
         switch (i) {
 
-            case 27:
+            case 0x1b:
                 k = 0;
                 break;
 
 
-            case 10:
-            case 13:
+            case 0xa:
+            case 0xd:
                 switch (j) {
                     case 0:
                         str = "\r";
@@ -479,7 +494,7 @@ public class cim
                 break;
 
             default:
-                str = super.translate_key(paramKeyEvent);
+                str = super.translate_key(keyEvent);
         }
 
 
@@ -910,19 +925,19 @@ public class cim
     }
 
     public void send_mouse_press(int paramInt) {
-        transmit("ÿÑ" + (char) paramInt);
+        transmit("" + TELNET_IAC + CMD_BUTTON_PRESS + (char) paramInt);
     }
 
     public void send_mouse_release(int paramInt) {
-        transmit("ÿÒ" + (char) paramInt);
+        transmit("" + TELNET_IAC + CMD_BUTTON_RELEASE + (char) paramInt);
     }
 
     public void send_mouse_click(int paramInt1, int paramInt2) {
-        transmit("ÿÓ" + (char) paramInt1 + "" + (char) paramInt2);
+        transmit("" + TELNET_IAC + CMD_BUTTON_CLICK + (char) paramInt1 + "" + (char) paramInt2);
     }
 
     public void send_mouse_byte(int paramInt) {
-        transmit("ÿÔ" + (char) paramInt);
+        transmit("" + TELNET_IAC + CMD_BYTE + (char) paramInt);
     }
 
     public void refresh_screen() {
@@ -933,14 +948,14 @@ public class cim
         transmit("\033[(");
     }
 
-    protected synchronized void set_framerate(int paramInt) {
-        framerate = paramInt;
-        this.screen.set_framerate(paramInt);
+    protected synchronized void set_framerate(int rate) {
+        framerate = rate;
+        this.screen.set_framerate(rate);
         set_status(3, "" + framerate);
     }
 
-    protected void show_error(String paramString) {
-        System.out.println("dvc:" + paramString + ": state " + dvc_decoder_state + " code " + dvc_code);
+    protected void show_error(String message) {
+        System.out.println("dvc:" + message + ": state " + dvc_decoder_state + " code " + dvc_code);
         System.out.println("dvc:error at byte count " + count_bytes);
     }
 
@@ -1092,7 +1107,7 @@ public class cim
     }
 
     protected void init_reversal() {
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < 0x100; i++) {
             int i1 = 8;
             int n = 8;
             int k = i;
@@ -1176,15 +1191,12 @@ public class cim
     }
 
     int process_bits(char paramChar) {
-        int n = 1;
-
         int m = 0;
-
 
         add_bits(paramChar);
         dvc_new_bits = paramChar;
         count_bytes += 1L;
-        int k = 0;
+        int k;
 
         label2353:
         while (m == 0) {
@@ -1196,10 +1208,7 @@ public class cim
                 break;
             }
 
-
             int i = get_bits(k);
-            dvc_counter_bits += k;
-
 
             if (dvc_code == 0) {
                 dvc_next_state = next_0[dvc_decoder_state];
@@ -1209,8 +1218,6 @@ public class cim
 
             int j;
             switch (dvc_decoder_state) {
-
-
                 case 3:
                 case 4:
                 case 5:
@@ -1373,7 +1380,7 @@ public class cim
                         }
                         dvc_lasty = 0;
                     }
-                    this.screen.repaint_it(1);
+                    this.screen.repaint_it(true);
                     break;
 
 
@@ -1409,7 +1416,7 @@ public class cim
                         get_bits(dvc_ib_bcnt & 0x7);
                     timeout_count = count_bytes;
 
-                    this.screen.repaint_it(1);
+                    this.screen.repaint_it(true);
                     break;
 
 
@@ -1620,7 +1627,7 @@ public class cim
     }
 
     boolean process_dvc(char paramChar) {
-        if (dvc_reversal['ÿ'] == 0) {
+        if (dvc_reversal[0xff] == 0) {
             System.out.println(" Version 20050808154652 ");
             init_reversal();
             cache_reset();
@@ -1630,7 +1637,7 @@ public class cim
             dvc_ib_acc = 0;
             dvc_ib_bcnt = 0;
             for (int j = 0; j < 4096; j++) {
-                this.color_remap_table[j] = ((j & 0xF00) * 4352 + (j & 0xF0) * 272 + (j & 0xF) * 17);
+                this.color_remap_table[j] = ((j & 0xF00) * 0x1100 + (j & 0xF0) * 0x110 + (j & 0xF) * 0x11);
             }
         }
 
@@ -1648,8 +1655,8 @@ public class cim
             System.out.println("Byte count " + count_bytes);
             bool = true;
 
-            dvc_decoder_state = 38;
-            dvc_next_state = 38;
+            dvc_decoder_state = LATCHED;
+            dvc_next_state = LATCHED;
 
             fatal_count = 0;
             refresh_screen();
@@ -1673,30 +1680,30 @@ public class cim
         this.mouse_protocol = paramInt;
     }
 
-    Cursor customCursor(Image paramImage, Point paramPoint, String paramString) {
-        Cursor localCursor = null;
+    private Cursor customCursor(Image paramImage, Point paramPoint, String paramString) {
+        Cursor cursor = null;
         try {
-            Class localClass = Toolkit.class;
-            Method localMethod = localClass.getMethod("createCustomCursor", new Class[]{Image.class, Point.class, String.class});
+            Class<Toolkit> localClass = Toolkit.class;
+            Method localMethod = localClass.getMethod("createCustomCursor", Image.class, Point.class, String.class);
 
             Toolkit localToolkit = Toolkit.getDefaultToolkit();
             if (localMethod != null) {
-                localCursor = (Cursor) localMethod.invoke(localToolkit, new Object[]{paramImage, paramPoint, paramString});
+                cursor = (Cursor) localMethod.invoke(localToolkit, new Object[]{paramImage, paramPoint, paramString});
             }
-        } catch (Exception localException) {
+        } catch (Exception e) {
             System.out.println("This JVM cannot create custom cursors");
         }
-        return localCursor;
+        return cursor;
     }
 
-    Cursor createCursor(int paramInt) {
+    Cursor createCursor(int cursorIndex) {
         String javaVersion = System.getProperty("java.version", "0");
 
         Toolkit localToolkit = Toolkit.getDefaultToolkit();
         Image localImage;
         int[] arrayOfInt;
         MemoryImageSource localMemoryImageSource;
-        switch (paramInt) {
+        switch (cursorIndex) {
             case 0:
                 return Cursor.getDefaultCursor();
             case 1:
@@ -1705,39 +1712,39 @@ public class cim
                 localImage = localToolkit.createImage(cursor_none);
                 break;
             case 3:
-                arrayOfInt = new int['Ѐ'];
-                arrayOfInt[0] = (arrayOfInt[1] = arrayOfInt[32] = arrayOfInt[33] = -8355712);
+                arrayOfInt = new int[21*12];
+                arrayOfInt[0] = (arrayOfInt[1] = arrayOfInt[32] = arrayOfInt[33] = W);
 
                 localMemoryImageSource = new MemoryImageSource(32, 32, arrayOfInt, 0, 32);
                 localImage = createImage(localMemoryImageSource);
                 break;
 
             case 4:
-                arrayOfInt = new int['Ѐ'];
-                for (int i = 0; i < 21; i++) {
-                    for (int j = 0; j < 12; j++) {
-                        arrayOfInt[(j + i * 32)] = cursor_outline[(j + i * 12)];
+                arrayOfInt = new int[21*12];
+                for (int row = 0; row < 21; row++) {
+                    for (int col = 0; col < 12; col++) {
+                        arrayOfInt[(col + row * 32)] = cursor_outline[(col + row * 12)];
                     }
                 }
                 localMemoryImageSource = new MemoryImageSource(32, 32, arrayOfInt, 0, 32);
                 localImage = createImage(localMemoryImageSource);
                 break;
             default:
-                System.out.println("createCursor: unknown cursor " + paramInt);
+                System.out.println("createCursor: unknown cursor " + cursorIndex);
                 return Cursor.getDefaultCursor();
         }
 
-        Cursor localCursor = null;
+        Cursor cursor = null;
         if (javaVersion.compareTo("1.2") < 0) {
             System.out.println("This JVM cannot create custom cursors");
         } else {
-            localCursor = customCursor(localImage, new Point(), "rcCursor");
+            cursor = customCursor(localImage, new Point(), "rcCursor");
         }
-        return localCursor != null ? localCursor : Cursor.getDefaultCursor();
+        return cursor != null ? cursor : Cursor.getDefaultCursor();
     }
 
     public void set_cursor(int paramInt) {
-        this.current_cursor = createCursor(paramInt);
-        setCursor(this.current_cursor);
+        this.currentCursor = createCursor(paramInt);
+        setCursor(this.currentCursor);
     }
 }
