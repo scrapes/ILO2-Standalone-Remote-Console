@@ -1,12 +1,11 @@
 package com.hp.ilo2.remcons;
 
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.io.PrintStream;
 
-public class MouseSync
-        implements MouseListener, MouseMotionListener, TimerListener {
+public class MouseSync implements MouseListener, MouseMotionListener, TimerListener {
     public static final int MOUSE_BUTTON_LEFT = 4;
     public static final int MOUSE_BUTTON_CENTER = 2;
     public static final int MOUSE_BUTTON_RIGHT = 1;
@@ -79,13 +78,13 @@ public class MouseSync
     private int pressed_button;
     private boolean dragging;
     private final Object mutex;
-    private boolean debug_msg = false;
+    private boolean debugMsgEnabled = false;
 
 
     public MouseSync(Object mutex) {
         this.mutex = mutex;
         this.state = STATE_INIT;
-        state_machine(CMD_START, null, 0, 0);
+        stateMachine(CMD_START, null, 0, 0);
     }
 
     public void setListener(MouseSyncListener listener) {
@@ -93,78 +92,78 @@ public class MouseSync
     }
 
     public void enableDebug() {
-        this.debug_msg = true;
+        this.debugMsgEnabled = true;
     }
 
     public void disableDebug() {
-        this.debug_msg = false;
+        this.debugMsgEnabled = false;
     }
 
     public void restart() {
-        go_state(STATE_INIT);
+        goState(STATE_INIT);
     }
 
     public void align() {
-        state_machine(CMD_ALIGN, null, 0, 0);
+        stateMachine(CMD_ALIGN, null, 0, 0);
     }
 
     public void sync() {
-        state_machine(CMD_SYNC, null, 0, 0);
+        stateMachine(CMD_SYNC, null, 0, 0);
     }
 
     public void serverMoved(int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
-        state_machine(CMD_SERVER_MOVE, null, paramInt1, paramInt2);
+        stateMachine(CMD_SERVER_MOVE, null, paramInt1, paramInt2);
     }
 
     public void serverScreen(int paramInt1, int paramInt2) {
-        state_machine(CMD_SERVER_SCREEN, null, paramInt1, paramInt2);
+        stateMachine(CMD_SERVER_SCREEN, null, paramInt1, paramInt2);
     }
 
     public void serverDisabled() {
-        state_machine(CMD_SERVER_DISABLE, null, 0, 0);
+        stateMachine(CMD_SERVER_DISABLE, null, 0, 0);
     }
 
     public void timeout(Object paramObject) {
-        state_machine(CMD_TIMEOUT, null, 0, 0);
+        stateMachine(CMD_TIMEOUT, null, 0, 0);
     }
 
-    public void mouseClicked(MouseEvent paramMouseEvent) {
-        state_machine(CMD_CLICK, paramMouseEvent, 0, 0);
+    public void mouseClicked(MouseEvent event) {
+        stateMachine(CMD_CLICK, event, 0, 0);
     }
 
-    public void mouseEntered(MouseEvent paramMouseEvent) {
-        //state_machine(CMD_ENTER, paramMouseEvent, 0, 0);
+    public void mouseEntered(MouseEvent event) {
+        //stateMachine(CMD_ENTER, event, 0, 0);
     }
 
-    public void mouseExited(MouseEvent mouseEvent) {
-        state_machine(CMD_EXIT, mouseEvent, 0, 0);
+    public void mouseExited(MouseEvent event) {
+        stateMachine(CMD_EXIT, event, 0, 0);
     }
 
-    public void mousePressed(MouseEvent mouseEvent) {
-        state_machine(CMD_PRESS, mouseEvent, 0, 0);
+    public void mousePressed(MouseEvent event) {
+        stateMachine(CMD_PRESS, event, 0, 0);
     }
 
-    public void mouseReleased(MouseEvent mouseEvent) {
-        state_machine(CMD_RELEASE, mouseEvent, 0, 0);
+    public void mouseReleased(MouseEvent event) {
+        stateMachine(CMD_RELEASE, event, 0, 0);
     }
 
-    public void mouseDragged(MouseEvent mouseEvent) {
-        state_machine(CMD_DRAG, mouseEvent, 0, 0);
-        move_delay();
+    public void mouseDragged(MouseEvent event) {
+        stateMachine(CMD_DRAG, event, 0, 0);
+        moveDelay();
     }
 
-    public void mouseMoved(MouseEvent mouseEvent) {
-        state_machine(CMD_MOVE, mouseEvent, 0, 0);
-        move_delay();
+    public void mouseMoved(MouseEvent event) {
+        stateMachine(CMD_MOVE, event, 0, 0);
+        moveDelay();
     }
 
-    private void move_delay() {
+    private void moveDelay() {
         try {
             Thread.sleep(TIMEOUT_DELAY);
         } catch (InterruptedException ignored) {}
     }
 
-    private void sync_default() {
+    private void syncDefault() {
         int[] arrayOfInt = {1, 4, 6, 8, 12, 16, 32, 64};
 
         this.send_dx = new int[arrayOfInt.length];
@@ -172,12 +171,10 @@ public class MouseSync
         this.recv_dx = new int[arrayOfInt.length];
         this.recv_dy = new int[arrayOfInt.length];
 
-        for (int i = 0; i < arrayOfInt.length; i++) {
-            this.send_dx[i] = arrayOfInt[i];
-            this.send_dy[i] = arrayOfInt[i];
-            this.recv_dx[i] = arrayOfInt[i];
-            this.recv_dy[i] = arrayOfInt[i];
-        }
+        System.arraycopy(arrayOfInt, 0, this.send_dx, 0, this.send_dx.length);
+        System.arraycopy(arrayOfInt, 0, this.send_dy, 0, this.send_dy.length);
+        System.arraycopy(arrayOfInt, 0, this.recv_dx, 0, this.recv_dx.length);
+        System.arraycopy(arrayOfInt, 0, this.recv_dx, 0, this.recv_dy.length);
 
         this.send_dx_index = 0;
         this.send_dy_index = 0;
@@ -188,7 +185,7 @@ public class MouseSync
         this.sync_successful = false;
     }
 
-    private void sync_continue() {
+    private void syncContinue() {
         int i = 1;
         int j = 1;
         int k = 0;
@@ -211,7 +208,7 @@ public class MouseSync
         this.timer.start();
     }
 
-    private void sync_update(int paramInt1, int paramInt2) {
+    private void syncUpdate(int paramInt1, int paramInt2) {
         this.timer.pause();
 
 
@@ -240,10 +237,10 @@ public class MouseSync
                 this.send_dx_success = 0;
                 this.send_dx_count = 0;
             } else if (this.send_dx_count >= SYNC_FAIL_COUNT) {
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("no x sync:" + this.send_dx[this.send_dx_index]);
                 }
-                go_state(STATE_ENABLE);
+                goState(STATE_ENABLE);
                 return;
             }
         }
@@ -260,28 +257,28 @@ public class MouseSync
                 this.send_dy_success = 0;
                 this.send_dy_count = 0;
             } else if (this.send_dy_count >= SYNC_FAIL_COUNT) {
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("no y sync:" + this.send_dy[this.send_dy_index]);
                 }
-                go_state(STATE_ENABLE);
+                goState(STATE_ENABLE);
                 return;
             }
         }
         if ((this.send_dx_index < 0) && (this.send_dy_index < 0)) {
             for (int k = this.send_dx.length - 1; k >= 0; k--) {
                 if ((this.recv_dx[k] == 0) || (this.recv_dy[k] == 0)) {
-                    if (this.debug_msg) {
+                    if (this.debugMsgEnabled) {
                         System.out.println("no movement:" + this.send_dx[k]);
                     }
-                    go_state(STATE_ENABLE);
+                    goState(STATE_ENABLE);
                     return;
                 }
                 if ((k != 0) && (
                         (this.recv_dx[k] < this.recv_dx[(k - 1)]) || (this.recv_dy[k] < this.recv_dy[(k - 1)]))) {
-                    if (this.debug_msg) {
+                    if (this.debugMsgEnabled) {
                         System.out.println("not linear:" + this.send_dx[k]);
                     }
-                    go_state(STATE_ENABLE);
+                    goState(STATE_ENABLE);
                     return;
                 }
             }
@@ -290,14 +287,14 @@ public class MouseSync
             this.sync_successful = true;
             this.send_dx_index = 0;
             this.send_dy_index = 0;
-            go_state(STATE_ENABLE);
+            goState(STATE_ENABLE);
         } else {
-            sync_continue();
+            syncContinue();
         }
     }
 
 
-    private void init_vars() {
+    private void initVars() {
         this.server_w = 640;
         this.server_h = 480;
         this.server_x = 0;
@@ -309,11 +306,11 @@ public class MouseSync
         this.pressed_button = 0;
         this.dragging = false;
 
-        sync_default();
+        syncDefault();
     }
 
 
-    private void move_server(boolean paramBoolean1, boolean paramBoolean2) {
+    private void moveServer(boolean paramBoolean1, boolean paramBoolean2) {
         int i1 = 0;
         int i2 = 0;
         int i3 = 0;
@@ -340,7 +337,7 @@ public class MouseSync
             k = -k;
         }
 
-        for (; ; ) {
+        do {
 
             int i;
             if (j != 0) {
@@ -386,10 +383,7 @@ public class MouseSync
             }
 
 
-            if ((j == 0) && (k == 0)) {
-                break;
-            }
-        }
+        } while ((j != 0) || (k != 0));
 
         this.client_dx -= m * i3;
         this.client_dy -= n * i4;
@@ -397,7 +391,7 @@ public class MouseSync
         if (!paramBoolean2) {
             this.server_x += m * i3;
             this.server_y -= n * i4;
-            if (this.debug_msg) {
+            if (this.debugMsgEnabled) {
                 System.out.println("Server:" + this.server_x + "," + this.server_y);
             }
         }
@@ -408,73 +402,70 @@ public class MouseSync
     }
 
 
-    private void go_state(int state) {
+    private void goState(int state) {
         synchronized (this.mutex) {
-            state_machine(CMD_STOP, null, 0, 0);
+            stateMachine(CMD_STOP, null, 0, 0);
             this.state = state;
-            state_machine(CMD_START, null, 0, 0);
+            stateMachine(CMD_START, null, 0, 0);
         }
     }
 
 
-    private void state_machine(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
+    private void stateMachine(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
         synchronized (this.mutex) {
             switch (this.state) {
                 case STATE_INIT:
-                    state_init(command, mouseEvent, paramInt2, paramInt3);
+                    stateInit(command, mouseEvent, paramInt2, paramInt3);
                     break;
 
                 case STATE_SYNC:
-                    state_sync(command, mouseEvent, paramInt2, paramInt3);
+                    stateSync(command, mouseEvent, paramInt2, paramInt3);
                     break;
 
                 case STATE_ENABLE:
-                    state_enable(command, mouseEvent, paramInt2, paramInt3);
+                    stateEnable(command, mouseEvent, paramInt2, paramInt3);
                     break;
 
                 case STATE_DISABLE:
-                    state_disable(command, mouseEvent, paramInt2, paramInt3);
+                    stateDisable(command, mouseEvent, paramInt2, paramInt3);
             }
 
         }
     }
 
 
-    private void state_init(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
-        switch (command) {
-            case CMD_START:
-                init_vars();
-                go_state(STATE_DISABLE);
-                break;
+    private void stateInit(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
+        if (command == CMD_START) {
+            initVars();
+            goState(STATE_DISABLE);
         }
-
     }
 
 
-    private void state_sync(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
+    private void stateSync(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
         switch (command) {
-            case 0:
+            case CMD_START:
                 this.timer = new Timer(TIMEOUT_SYNC, false, this.mutex);
                 this.timer.setListener(this, null);
-                sync_default();
+                syncDefault();
                 this.send_dx_index = (this.send_dx.length - 1);
                 this.send_dy_index = (this.send_dy.length - 1);
-                sync_continue();
+                syncContinue();
                 break;
-            case 1:
+            case CMD_STOP:
                 this.timer.stop();
                 this.timer = null;
                 if (!this.sync_successful) {
-                    if (this.debug_msg) {
+                    if (this.debugMsgEnabled) {
                         System.out.println("fail");
                     }
-                    sync_default();
+                    syncDefault();
 
-                } else if (this.debug_msg) {
+                } else if (this.debugMsgEnabled) {
                     System.out.println("success");
                 }
 
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     for (int i = 0; i < this.send_dx.length; i++) {
                         System.out.println(this.recv_dx[i]);
                     }
@@ -483,42 +474,41 @@ public class MouseSync
                     }
                 }
                 break;
-            case 2:
-                go_state(1);
+            case CMD_SYNC:
+                goState(1);
                 break;
-            case 3:
+            case CMD_SERVER_MOVE:
                 if ((paramInt2 > 2000) || (paramInt3 > 2000)) {
-                    go_state(3);
+                    goState(3);
                 } else {
-                    sync_update(paramInt2, paramInt3);
+                    syncUpdate(paramInt2, paramInt3);
                 }
                 break;
-            case 4:
+            case CMD_SERVER_SCREEN:
                 this.server_w = paramInt2;
                 this.server_h = paramInt3;
                 break;
-            case 5:
-                go_state(3);
+            case CMD_SERVER_DISABLE:
+                goState(3);
                 break;
-            case 6:
-                go_state(2);
+            case CMD_TIMEOUT:
+                goState(2);
                 break;
-            case 8:
-            case 9:
-            case 12:
-            case 13:
+            case CMD_ENTER:
+            case CMD_EXIT:
+            case CMD_DRAG:
+            case CMD_MOVE:
                 this.client_x = mouseEvent.getX();
                 this.client_y = mouseEvent.getY();
                 break;
         }
-
     }
 
 
-    private void state_enable(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
+    private void stateEnable(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
         switch (command) {
             case CMD_START:
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("enable");
                 }
                 this.timer = new Timer(TIMEOUT_MOVE, false, this.mutex);
@@ -531,15 +521,15 @@ public class MouseSync
                 break;
 
             case CMD_SYNC:
-                go_state(STATE_SYNC);
+                goState(STATE_SYNC);
                 break;
 
             case CMD_SERVER_MOVE:
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("Server:" + paramInt2 + "," + paramInt3);
                 }
                 if ((paramInt2 > 2000) || (paramInt3 > 2000)) {
-                    go_state(STATE_DISABLE);
+                    goState(STATE_DISABLE);
                 } else {
                     this.server_x = paramInt2;
                     this.server_y = paramInt3;
@@ -552,18 +542,18 @@ public class MouseSync
                 break;
 
             case CMD_SERVER_DISABLE:
-                go_state(STATE_DISABLE);
+                goState(STATE_DISABLE);
                 break;
 
             case CMD_ALIGN:
                 this.client_dx = (this.client_x - this.server_x);
                 this.client_dy = (this.server_y - this.client_y);
-                move_server(true, true);
+                moveServer(true, true);
                 break;
 
 
             case CMD_TIMEOUT:
-                move_server(true, true);
+                moveServer(true, true);
                 break;
 
             case CMD_ENTER:
@@ -582,7 +572,7 @@ public class MouseSync
                 if (this.client_y > this.server_h) {
                     this.client_y = this.server_h;
                 }
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("eClient:" + this.client_x + "," + this.client_y);
                 }
                 if ((this.pressed_button != MOUSE_BUTTON_RIGHT) && ((mouseEvent.getModifiers() & 0x2) == 0)) {
@@ -599,25 +589,25 @@ public class MouseSync
                     }
                     this.client_dx += mouseEvent.getX() - this.client_x;
                     this.client_dy += this.client_y - mouseEvent.getY();
-                    move_server(false, true);
+                    moveServer(false, true);
                 }
                 this.client_x = mouseEvent.getX();
                 this.client_y = mouseEvent.getY();
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("Client:" + this.client_x + "," + this.client_y);
                 }
                 this.dragging = true;
                 break;
 
             case CMD_MOVE:
-                if ((mouseEvent.getModifiers() & 0x2) == 0) {
+                if ((mouseEvent.getModifiers() & InputEvent.CTRL_MASK) == 0) {
                     this.client_dx += mouseEvent.getX() - this.client_x;
                     this.client_dy += this.client_y - mouseEvent.getY();
-                    move_server(false, true);
+                    moveServer(false, true);
                 }
                 this.client_x = mouseEvent.getX();
                 this.client_y = mouseEvent.getY();
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("Client:" + this.client_x + "," + this.client_y);
                 }
 
@@ -646,8 +636,6 @@ public class MouseSync
                 }
                 this.pressed_button = 0;
                 break;
-
-
             case CMD_CLICK:
                 if (!this.dragging) {
                     if ((mouseEvent.getModifiers() & 0x10) != 0) {
@@ -658,18 +646,15 @@ public class MouseSync
                         this.listener.serverClick(MOUSE_BUTTON_RIGHT, 1);
                     }
                 }
-
-
                 break;
         }
-
     }
 
 
-    private void state_disable(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
+    private void stateDisable(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
         switch (command) {
             case CMD_START:
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("disable");
                 }
                 this.timer = new Timer(TIMEOUT_MOVE, false, this.mutex);
@@ -682,17 +667,17 @@ public class MouseSync
                 break;
 
             case CMD_SYNC:
-                sync_default();
+                syncDefault();
                 break;
 
             case CMD_SERVER_MOVE:
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("Server:" + paramInt2 + "," + paramInt3);
                 }
                 if ((paramInt2 < 2000) && (paramInt3 < 2000)) {
                     this.server_x = paramInt2;
                     this.server_y = paramInt3;
-                    go_state(STATE_ENABLE);
+                    goState(STATE_ENABLE);
                 }
 
 
@@ -708,14 +693,11 @@ public class MouseSync
             case CMD_ALIGN:
                 this.client_dx = (this.client_x - this.server_x);
                 this.client_dy = (this.server_y - this.client_y);
-                move_server(true, false);
+                moveServer(true, false);
                 break;
-
-
             case CMD_TIMEOUT:
-                move_server(true, false);
+                moveServer(true, false);
                 break;
-
             case CMD_ENTER:
             case CMD_EXIT:
                 this.client_x = mouseEvent.getX();
@@ -732,14 +714,13 @@ public class MouseSync
                 if (this.client_y > this.server_h) {
                     this.client_y = this.server_h;
                 }
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("eClient:" + this.client_x + "," + this.client_y);
                 }
                 if ((this.pressed_button != 1) && ((mouseEvent.getModifiers() & 0x2) == 0)) {
 
                     align();
                 }
-
                 break;
             case CMD_DRAG:
                 if (this.pressed_button != 1) {
@@ -749,34 +730,32 @@ public class MouseSync
                     }
                     this.client_dx += mouseEvent.getX() - this.client_x;
                     this.client_dy += this.client_y - mouseEvent.getY();
-                    move_server(false, false);
+                    moveServer(false, false);
                 } else {
                     this.server_x = mouseEvent.getX();
                     this.server_y = mouseEvent.getY();
                 }
                 this.client_x = mouseEvent.getX();
                 this.client_y = mouseEvent.getY();
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("Client:" + this.client_x + "," + this.client_y);
                 }
                 this.dragging = true;
                 break;
-
             case CMD_MOVE:
                 if ((mouseEvent.getModifiers() & 0x2) == 0) {
                     this.client_dx += mouseEvent.getX() - this.client_x;
                     this.client_dy += this.client_y - mouseEvent.getY();
-                    move_server(false, false);
+                    moveServer(false, false);
                 } else {
                     this.server_x = mouseEvent.getX();
                     this.server_y = mouseEvent.getY();
                 }
                 this.client_x = mouseEvent.getX();
                 this.client_y = mouseEvent.getY();
-                if (this.debug_msg) {
+                if (this.debugMsgEnabled) {
                     System.out.println("Client:" + this.client_x + "," + this.client_y);
                 }
-
                 break;
             case CMD_PRESS:
                 if (this.pressed_button == 0) {
@@ -789,8 +768,6 @@ public class MouseSync
                     }
                     this.dragging = false;
                 }
-
-
                 break;
             case CMD_RELEASE:
                 if (this.pressed_button == -MOUSE_BUTTON_LEFT) {
@@ -802,8 +779,6 @@ public class MouseSync
                 }
                 this.pressed_button = 0;
                 break;
-
-
             case CMD_CLICK:
                 if (!this.dragging) {
                     if ((mouseEvent.getModifiers() & 0x10) != 0) {
@@ -818,9 +793,3 @@ public class MouseSync
         }
     }
 }
-
-
-/* Location:              C:\Users\anton\Documents\ILO2\rc175p10.jar!\com\hp\ilo2\remcons\MouseSync.class
- * Java compiler version: 4 (48.0)
- * JD-Core Version:       0.7.1
- */
