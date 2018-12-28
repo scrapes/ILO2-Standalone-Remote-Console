@@ -6,9 +6,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 public class MouseSync implements MouseListener, MouseMotionListener, TimerListener {
-    public static final int MOUSE_BUTTON_LEFT = 4;
-    public static final int MOUSE_BUTTON_CENTER = 2;
-    public static final int MOUSE_BUTTON_RIGHT = 1;
+    private static final int MOUSE_BUTTON_LEFT = 4;
+    private static final int MOUSE_BUTTON_CENTER = 2;
+    private static final int MOUSE_BUTTON_RIGHT = 1;
 
     private static final int CMD_START = 0;
     private static final int CMD_STOP = 1;
@@ -45,7 +45,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
     enum State {
         INIT, SYNC, ENABLE, DISABLE
     }
-    private int state;
+    private State state;
 
     private static final int SYNC_SUCCESS_COUNT = 2;
     private static final int SYNC_FAIL_COUNT = 4;
@@ -83,7 +83,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
 
     public MouseSync(Object mutex) {
         this.mutex = mutex;
-        this.state = STATE_INIT;
+        this.state = State.INIT;
         stateMachine(CMD_START, null, 0, 0);
     }
 
@@ -100,7 +100,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
     }
 
     void restart() {
-        goState(STATE_INIT);
+        goState(State.INIT);
     }
 
     void align() {
@@ -238,7 +238,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 if (this.debugMsgEnabled) {
                     System.out.println("no x sync:" + this.send_dx[this.send_dx_index]);
                 }
-                goState(STATE_ENABLE);
+                goState(State.ENABLE);
                 return;
             }
         }
@@ -258,7 +258,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 if (this.debugMsgEnabled) {
                     System.out.println("no y sync:" + this.send_dy[this.send_dy_index]);
                 }
-                goState(STATE_ENABLE);
+                goState(State.ENABLE);
                 return;
             }
         }
@@ -268,7 +268,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                     if (this.debugMsgEnabled) {
                         System.out.println("no movement:" + this.send_dx[k]);
                     }
-                    goState(STATE_ENABLE);
+                    goState(State.ENABLE);
                     return;
                 }
                 if ((k != 0) && (
@@ -276,7 +276,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                     if (this.debugMsgEnabled) {
                         System.out.println("not linear:" + this.send_dx[k]);
                     }
-                    goState(STATE_ENABLE);
+                    goState(State.ENABLE);
                     return;
                 }
             }
@@ -285,7 +285,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
             this.sync_successful = true;
             this.send_dx_index = 0;
             this.send_dy_index = 0;
-            goState(STATE_ENABLE);
+            goState(State.ENABLE);
         } else {
             syncContinue();
         }
@@ -400,7 +400,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
     }
 
 
-    private void goState(int state) {
+    private void goState(State state) {
         synchronized (this.mutex) {
             stateMachine(CMD_STOP, null, 0, 0);
             this.state = state;
@@ -412,16 +412,16 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
     private void stateMachine(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
         synchronized (this.mutex) {
             switch (this.state) {
-                case STATE_INIT:
+                case INIT:
                     stateInit(command, mouseEvent, paramInt2, paramInt3);
                     break;
-                case STATE_SYNC:
+                case SYNC:
                     stateSync(command, mouseEvent, paramInt2, paramInt3);
                     break;
-                case STATE_ENABLE:
+                case ENABLE:
                     stateEnable(command, mouseEvent, paramInt2, paramInt3);
                     break;
-                case STATE_DISABLE:
+                case DISABLE:
                     stateDisable(command, mouseEvent, paramInt2, paramInt3);
                     break;
             }
@@ -432,7 +432,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
     private void stateInit(int command, MouseEvent mouseEvent, int paramInt2, int paramInt3) {
         if (command == CMD_START) {
             initVars();
-            goState(STATE_DISABLE);
+            goState(State.DISABLE);
         }
     }
 
@@ -470,11 +470,11 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 }
                 break;
             case CMD_SYNC:
-                goState(1);
+                goState(State.SYNC);
                 break;
             case CMD_SERVER_MOVE:
                 if ((paramInt2 > 2000) || (paramInt3 > 2000)) {
-                    goState(3);
+                    goState(State.DISABLE);
                 } else {
                     syncUpdate(paramInt2, paramInt3);
                 }
@@ -484,10 +484,10 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 this.server_h = paramInt3;
                 break;
             case CMD_SERVER_DISABLE:
-                goState(3);
+                goState(State.DISABLE);
                 break;
             case CMD_TIMEOUT:
-                goState(2);
+                goState(State.ENABLE);
                 break;
             case CMD_ENTER:
             case CMD_EXIT:
@@ -516,7 +516,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 break;
 
             case CMD_SYNC:
-                goState(STATE_SYNC);
+                goState(State.SYNC);
                 break;
 
             case CMD_SERVER_MOVE:
@@ -524,7 +524,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                     System.out.println("Server:" + paramInt2 + "," + paramInt3);
                 }
                 if ((paramInt2 > 2000) || (paramInt3 > 2000)) {
-                    goState(STATE_DISABLE);
+                    goState(State.DISABLE);
                 } else {
                     this.server_x = paramInt2;
                     this.server_y = paramInt3;
@@ -537,7 +537,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 break;
 
             case CMD_SERVER_DISABLE:
-                goState(STATE_DISABLE);
+                goState(State.DISABLE);
                 break;
 
             case CMD_ALIGN:
@@ -646,7 +646,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
                 if ((paramInt2 < 2000) && (paramInt3 < 2000)) {
                     this.server_x = paramInt2;
                     this.server_y = paramInt3;
-                    goState(STATE_ENABLE);
+                    goState(State.ENABLE);
                 }
 
                 break;
