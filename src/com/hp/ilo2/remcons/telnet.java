@@ -47,7 +47,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
     dvcwin screen;
 
     private TextField statusBox;
-    private String[] statusFields = new String[4];
+    private String[] statusFields = new String[5];
 
     private Thread receiver;
     private Socket s;
