@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.Security;
 import java.util.*;
 
 import com.hp.ilo2.remcons.remcons;
@@ -59,6 +60,9 @@ public class Main {
     private static void Stage1() throws Exception {
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
+        System.setProperty("https.protocols", "TLSv1");
+        System.setProperty("javax.net.debug", "all");
+        Security.setProperty("jdk.tls.disabledAlgorithms", "");
         URL obj = new URL(loginURL);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
