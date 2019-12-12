@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/rc175p10.jar.src.iml" filepath="$PROJECT_DIR$/rc175p10.jar.src.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ILO2RemCon.iml" filepath="$PROJECT_DIR$/ILO2RemCon.iml" />
     </modules>
   </component>
 </project>

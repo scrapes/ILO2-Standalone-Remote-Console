@@ -3,25 +3,21 @@
 <param name='param' value='foo'>
 </applet>
 */
-package com.hp.ilo2.remcons;
 
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+
+import com.hp.ilo2.remcons.remcons;
 import mjson.Json;
 import sun.misc.BASE64Encoder;
 
 import java.util.List;
-
-import java.util.concurrent.TimeUnit;
 
 /*
 
@@ -35,28 +31,35 @@ var sessionkey="LMQJVGLGKQGMIAAEGQHZJUORCOBVQOUZIEXNVTUO";
 var sessionindex="00000005";
 
 
- */
+*/
 
 public class Main {
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
 
-    private static String _username = "";
-    private static String _password = "";
-    private static String Hostname = "";
+    private static final String COOKIE_FILE = "data.cook";
 
-    private static String Sessionkey = "";
-    private static String Sessionindex = "";
+    private static String username = "";
+    private static String password = "";
+    private static String hostname = "";
+
+    public static void setHostname(String hostname) {
+        Main.hostname = hostname;
+        Main.loginURL = "https://" + hostname + "/login.htm";
+    }
+
+    private static String loginURL = "";
+
+    private static String sessionKey = "";
+    private static String sessionIndex = "";
     private static String supercookie = "";
-
 
     private static CookieManager cookieManager = new CookieManager();
 
-    private static void Stage1() throws Exception
-    {
+
+    private static void Stage1() throws Exception {
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
-        String url = "https://" + Hostname + "/login.htm";
-        URL obj = new URL(url);
+        URL obj = new URL(loginURL);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         // optional default is GET
@@ -64,8 +67,8 @@ public class Main {
 
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
-        con.setRequestProperty("Host", Hostname);
+        con.setRequestProperty("Referer", loginURL);
+        con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
         con.setRequestProperty("Cookie", "hp-iLO-Login=");
 
@@ -73,7 +76,7 @@ public class Main {
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -81,62 +84,57 @@ public class Main {
         in.close();
 
         String res = response.toString();
-        Sessionkey = res.split("var sessionkey=\"")[1].split("\";")[0];
-        Sessionindex = res.split("var sessionindex=\"")[1].split("\";")[0];
-        System.out.println(Sessionkey);
-        System.out.println(Sessionindex);
+        sessionKey = res.split("var sessionkey=\"")[1].split("\";")[0];
+        sessionIndex = res.split("var sessionindex=\"")[1].split("\";")[0];
+        System.out.println("Session key: " + sessionKey);
+        System.out.println("Session  ID: " + sessionIndex);
     }
+
+
     private static void Stage2() throws Exception {
-
-
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
 
-        String url = "https://" + Hostname + "/index.htm";
-        URL obj = new URL(url);
+        URL obj = new URL("https://" + hostname + "/index.htm");
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
-        con.setRequestProperty("Host", Hostname);
+        con.setRequestProperty("Referer", loginURL);
+        con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
         //Cookie:
         con.setDoOutput(true);
         BASE64Encoder enc = new BASE64Encoder(); //Authenticate
 
-        con.setRequestProperty("Cookie", "hp-iLO-Login=" + Sessionindex + ":" + enc.encode(_username.getBytes()) + ":" + enc.encode(_password.getBytes()) + ":" + Sessionkey);
+        con.setRequestProperty("Cookie", "hp-iLO-Login=" + sessionIndex + ":" + enc.encode(username.getBytes()) + ":" + enc.encode(password.getBytes()) + ":" + sessionKey);
 
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
 
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
+        //noinspection StatementWithEmptyBody
+        while (in.readLine() != null) { } // discard
         in.close();
 
         List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
-        PrintWriter writer = new PrintWriter("data.cook", "UTF-8");
+        PrintWriter writer = new PrintWriter(COOKIE_FILE, "UTF-8");
         for (HttpCookie cookie : cookies) {
-            System.out.println(cookie.getDomain());
-            System.out.println(cookie);
+            System.out.format("Session cookie: %s: %s\n", cookie.getDomain(), cookie);
             writer.println(cookie.toString().replace("\"", ""));
         }
         writer.close();
 
     }
 
+
     private static HashMap<String, String> hmap = new HashMap<>();
-    private static void Stage3() throws Exception
-    {
-        // https://" + Hostname + "/drc2fram.htm?restart=1
+
+    private static void Stage3() throws Exception {
+        // https://" + hostname + "/drc2fram.htm?restart=1
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
-        String url = "https://" + Hostname + "/drc2fram.htm?restart=1";
+        String url = "https://" + hostname + "/drc2fram.htm?restart=1";
         URL obj = new URL(url);
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -146,18 +144,17 @@ public class Main {
 
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
-        con.setRequestProperty("Host", Hostname);
+        con.setRequestProperty("Referer", loginURL);
+        con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
-        if(supercookie != "")
-        {
+        if(supercookie != "") {
             con.setRequestProperty("Cookie", supercookie);
         }
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -186,16 +183,13 @@ public class Main {
 
         hmap.put("CABBASE", res.split("<PARAM NAME=CABBASE VALUE=")[1].split(">\"")[0]);
 
-        System.out.println(hmap.get("CABBASE"));
-
-
-
+        System.out.println("CABBASE = " + hmap.get("CABBASE"));
     }
 
-    public static boolean isValid(String cookie) throws Exception
-    {
+
+    public static boolean isValid(String cookie) throws Exception {
         CookieHandler.setDefault(cookieManager);
-        String url = "https://" + Hostname + "/ie_index.htm";
+        String url = "https://" + hostname + "/ie_index.htm";
         URL obj = new URL(url);
 
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -205,15 +199,15 @@ public class Main {
 
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
-        con.setRequestProperty("Referer", "https://" + Hostname + "/login.htm");
-        con.setRequestProperty("Host", Hostname);
+        con.setRequestProperty("Referer", loginURL);
+        con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
         con.setRequestProperty("Cookie", cookie);
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -224,8 +218,9 @@ public class Main {
 
         return !(res.contains("Login Delay") || res.contains("Integrated Lights-Out 2 Login"));
     }
-    public static void main(String[] args){
 
+
+    public static void main(String[] args) {
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
         CookieHandler.setDefault(cookieManager);
@@ -233,71 +228,54 @@ public class Main {
             String config = new String(Files.readAllBytes(Paths.get("config.json")));
             System.out.println("Config JSON:" + config);
             Json js = Json.read(config);
-            _username = js.at("Username").asString();
-            _password = js.at("Password").asString();
-            Hostname = js.at("Hostname").asString();
-        }
-        catch (Exception ee){
+            username = js.at("Username").asString();
+            password = js.at("Password").asString();
+            setHostname(js.at("Hostname").asString());
+        } catch (Exception e) {
             System.err.println("Error in parsing config file!");
-            System.err.println(ee.toString());
+            e.printStackTrace();
             return;
         }
-        try
-        {
+        try {
             try (BufferedReader br = new BufferedReader(new FileReader("data.cook"))) {
-                System.out.println("Found Datastore");
+                System.out.println("Found datastore");
                 String line;
                 String lastline = "";
                 while ((line = br.readLine()) != null) {
-                    cookieManager.getCookieStore().add(new URI("https://" + Hostname + ""), new HttpCookie(line.split("=")[0], line.split("=")[1]));
+                    cookieManager.getCookieStore().add(new URI("https://" + hostname), new HttpCookie(line.split("=")[0], line.split("=")[1]));
                     lastline = line;
                 }
 
-                if(!isValid(lastline))
-                {
-                    System.out.println("Datastore not Valid, requesting Cookie");
+                if(!isValid(lastline)) {
+                    System.out.println("Datastore not valid, requesting Cookie");
                     Stage1();
                     Stage2();
-
-                }
-                else
-                {
+                } else {
                     supercookie = lastline;
                 }
-
-            }
-            catch(Exception ee)
-            {
-                System.err.println(ee.toString());
-                System.out.println("Didnt found data Store, requesting Cookie");
+            } catch (FileNotFoundException e) {
+                System.out.println("Couldn't find datastore, requesting Cookie");
                 Stage1();
                 Stage2();
-
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             Stage3();
-            //hmap.put("IPADDR", Hostname);
+            //hmap.put("IPADDR", hostname);
             //hmap.put("DEBUG", "suckAdIck");
 
             remcons rmc = new remcons(hmap);
-            rmc.SetHost(Hostname);
+            rmc.SetHost(hostname);
 
-            JFrame jf = new JFrame ();
-            Container c = jf.getContentPane ();
-            jf.setBounds (0, 0, 1070,880);
-            jf.setVisible (true);
-            c.add (rmc);
+            JFrame jf = new JFrame();
+            Container c = jf.getContentPane();
+            jf.setBounds(0, 0, 1070,880);
+            jf.setVisible(true);
+            c.add(rmc);
             rmc.init();
             rmc.start();
-
-
-
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        catch (Exception ee)
-        {
-            System.err.println(ee.toString());
-        }
-
     }
 }

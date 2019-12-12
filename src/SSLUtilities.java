@@ -1,5 +1,3 @@
-package com.hp.ilo2.remcons;
-
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
