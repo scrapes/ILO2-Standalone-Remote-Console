@@ -20,29 +20,29 @@ import java.security.NoSuchAlgorithmException;
 public class telnet extends Panel implements Runnable, MouseListener, FocusListener, KeyListener {
     private static final int TELNET_PORT = 23;
 
-    public static final int TELNET_ENCRYPT = 0xc0;
-    public static final int TELNET_CHG_ENCRYPT_KEYS = 193;
-    public static final int TELNET_SE = 240;
-    public static final int TELNET_NOP = 241;
-    public static final int TELNET_DM = 242;
-    public static final int TELNET_BRK = 243;
-    public static final int TELNET_IP = 244;
-    public static final int TELNET_AO = 245;
-    public static final int TELNET_AYT = 246;
-    public static final int TELNET_EC = 247;
-    public static final int TELNET_EL = 248;
-    public static final int TELNET_GA = 249;
-    public static final int TELNET_SB = 250;
-    public static final int TELNET_WILL = 251;
-    public static final int TELNET_WONT = 252;
-    public static final int TELNET_DO = 253;
-    public static final int TELNET_DONT = 254;
-    public static final int TELNET_IAC = 255;
+    public static final byte TELNET_ENCRYPT = (byte) 0xc0;
+    public static final byte TELNET_CHG_ENCRYPT_KEYS = (byte) 0xc1;
+    public static final byte TELNET_SE = (byte) 0xf0;
+    public static final byte TELNET_NOP = (byte) 0xf1;
+    public static final byte TELNET_DM = (byte) 0xf2;
+    public static final byte TELNET_BRK = (byte) 0xf3;
+    public static final byte TELNET_IP = (byte) 0xf4;
+    public static final byte TELNET_AO = (byte) 0xf5;
+    public static final byte TELNET_AYT = (byte) 0xf6;
+    public static final byte TELNET_EC = (byte) 0xf7;
+    public static final byte TELNET_EL = (byte) 0xf8;
+    public static final byte TELNET_GA = (byte) 0xf9;
+    public static final byte TELNET_SB = (byte) 0xfa;
+    public static final byte TELNET_WILL = (byte) 0xfb;
+    public static final byte TELNET_WONT = (byte) 0xfc;
+    public static final byte TELNET_DO = (byte) 0xfd;
+    public static final byte TELNET_DONT = (byte) 0xfe;
+    public static final byte TELNET_IAC = (byte) 0xff;
 
-    private static final int CMD_TS_AVAIL = 194;
-    private static final int CMD_TS_NOT_AVAIL = 195;
-    private static final int CMD_TS_STARTED = 196;
-    private static final int CMD_TS_STOPPED = 197;
+    private static final byte CMD_TS_AVAIL = (byte) 0xc2;
+    private static final byte CMD_TS_NOT_AVAIL = (byte) 0xc3;
+    private static final byte CMD_TS_STARTED = (byte) 0xc4;
+    private static final byte CMD_TS_STOPPED = (byte) 0xc5;
 
     dvcwin screen;
 
@@ -139,7 +139,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
                 System.out.println("exec: " + str2);
                 try {
                     this.rdpProc = localRuntime.exec(str2);
-                    transmit("" + TELNET_IAC + CMD_TS_STARTED);
+                    transmit(new byte[] {TELNET_IAC, CMD_TS_STARTED});
                 } catch (SecurityException e) {
                     System.out.println("SecurityException: " + e.getMessage() + ":: Attempting to launch " + str2);
                 } catch (IOException e) {
@@ -155,7 +155,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
                 this.rdpProc = localRuntime.exec("mstsc /f /console /v:" + this.host + ":" + this.terminalServicesPort);
 
 
-                transmit("" + TELNET_IAC + CMD_TS_STARTED);
+                transmit(new byte[] {TELNET_IAC, CMD_TS_STARTED});
             } catch (SecurityException e) {
                 System.out.println("SecurityException: " + e.getMessage() + ":: Attempting to launch mstsc.");
             } catch (IOException e) {
@@ -170,7 +170,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
                     this.rdpProc = localRuntime.exec(arrayOfString);
 
 
-                    transmit("" + TELNET_IAC + CMD_TS_STARTED);
+                    transmit(new byte[] {TELNET_IAC, CMD_TS_STARTED});
                 } catch (SecurityException e) {
                     System.out.println("SecurityException: " + e.getMessage() + ":: Attempting to launch mstsc.");
                 } catch (IOException e) {
@@ -184,7 +184,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
                     this.rdpProc = localRuntime.exec(arrayOfString);
 
 
-                    transmit("" + TELNET_IAC + CMD_TS_STARTED);
+                    transmit(new byte[] {TELNET_IAC, CMD_TS_STARTED});
                 } catch (SecurityException e) {
                     System.out.println("SecurityException: " + e.getMessage() + ":: Attempting to launch mstsc.");
                 } catch (IOException e) {
@@ -211,7 +211,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
 
 
     public void send_auto_alive_msg() {
-        transmit("" + "\033[&");
+        transmit("\033[&");
     }
 
 
@@ -375,6 +375,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
     }
 
 
+    // TAKE EXTRA CARE TO CONVERT INTEGERS TO BYTES PROPERLY WHEN USING THIS
     public synchronized void transmit(String paramString) {
         if (this.out == null) {
             return;
@@ -382,12 +383,20 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
         if (paramString.length() != 0) {
             byte[] arrayOfByte = new byte[paramString.length()];
 
-
             for (int i = 0; i < paramString.length(); i++) {
                 arrayOfByte[i] = ((byte) paramString.charAt(i));
             }
+            transmit(arrayOfByte);
+        }
+    }
+
+    public synchronized void transmit(byte[] data) {
+        if (this.out == null) {
+            return;
+        }
+        if (data.length != 0) {
             try {
-                this.out.write(arrayOfByte, 0, arrayOfByte.length);
+                this.out.write(data, 0, data.length);
             } catch (IOException localIOException) {
                 System.out.println("telnet.transmit() IOException: " + localIOException);
             }
@@ -441,7 +450,6 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
         return true;
     }
 
-
     public void run() {
         int i = 0;
         int j = 0;
@@ -460,7 +468,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
                         this.rdpProc = null;
 
 
-                        transmit("" + TELNET_IAC + CMD_TS_STOPPED);
+                        transmit(new byte[] {TELNET_IAC, CMD_TS_STOPPED});
                     } catch (IllegalThreadStateException ignored) {}
                 }
 
@@ -506,7 +514,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
                         }
 
 
-                    } else if (c1 == 27) {
+                    } else if (c1 == 27) { // this sequence has to happen before anything else - it gates the above if block
                         j = 1;
                     } else if ((j == 1) && (c1 == '[')) {
                         j = 2;
@@ -568,7 +576,7 @@ public class telnet extends Panel implements Runnable, MouseListener, FocusListe
             }
             this.rdpProc = null;
 
-            transmit("" + TELNET_IAC + CMD_TS_STOPPED);
+            transmit(new byte[] {TELNET_IAC, CMD_TS_STOPPED});
         }
         System.out.println("TS stop.");
     }

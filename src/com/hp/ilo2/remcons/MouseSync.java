@@ -179,7 +179,7 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
         System.arraycopy(arrayOfInt, 0, this.send_dx, 0, this.send_dx.length);
         System.arraycopy(arrayOfInt, 0, this.send_dy, 0, this.send_dy.length);
         System.arraycopy(arrayOfInt, 0, this.recv_dx, 0, this.recv_dx.length);
-        System.arraycopy(arrayOfInt, 0, this.recv_dx, 0, this.recv_dy.length);
+        System.arraycopy(arrayOfInt, 0, this.recv_dy, 0, this.recv_dy.length);
 
         this.send_dx_index = 0;
         this.send_dy_index = 0;
@@ -314,86 +314,80 @@ public class MouseSync implements MouseListener, MouseMotionListener, TimerListe
 
 
     private void moveServer(boolean paramBoolean1, boolean paramBoolean2) {
-        int i1 = 0;
-        int i2 = 0;
-        int i3 = 0;
-        int i4 = 0;
+        int step_dx = 0;
+        int step_dy = 0;
+        int total_dx_sent_abs = 0;
+        int total_dy_sent_abs = 0;
 
         this.timer.pause();
 
-        int j = this.client_dx;
-        int k = this.client_dy;
+        int dx_abs = this.client_dx;
+        int dy_abs = this.client_dy;
 
-        int m;
-        if (j >= 0) {
-            m = 1;
-        } else {
-            m = -1;
-            j = -j;
+        int sign_dx = 1;
+        if (this.client_dx < 0) {
+            sign_dx = -1;
+            dx_abs = -this.client_dx;
         }
 
-        int n;
-        if (k >= 0) {
-            n = 1;
-        } else {
-            n = -1;
-            k = -k;
+        int sign_dy = 1;
+        if (this.client_dy < 0) {
+            sign_dy = -1;
+            dy_abs = -this.client_dy;
         }
 
-        do {
-
-            int i;
-            if (j != 0) {
+        while ((dx_abs != 0) || (dy_abs != 0)) {
+            if (dx_abs != 0) {
+                int i;
                 for (i = this.send_dx.length - 1; i >= this.send_dx_index; i--) {
-                    if (this.recv_dx[i] <= j) {
-                        i1 = m * this.send_dx[i];
-                        i3 += this.recv_dx[i];
-                        j -= this.recv_dx[i];
+                    if (this.recv_dx[i] <= dx_abs) {
+                        step_dx = sign_dx * this.send_dx[i];
+                        total_dx_sent_abs += this.recv_dx[i];
+                        dx_abs -= this.recv_dx[i];
                         break;
                     }
                 }
                 if (i < this.send_dx_index) {
-                    i1 = 0;
-                    i3 += j;
-                    j = 0;
+                    step_dx = 0;
+                    total_dx_sent_abs += dx_abs;
+                    dx_abs = 0;
                 }
             } else {
-                i1 = 0;
+                step_dx = 0;
             }
 
 
-            if (k != 0) {
+            if (dy_abs != 0) {
+                int i;
                 for (i = this.send_dy.length - 1; i >= this.send_dy_index; i--) {
-                    if (this.recv_dy[i] <= k) {
-                        i2 = n * this.send_dy[i];
-                        i4 += this.recv_dy[i];
-                        k -= this.recv_dy[i];
+                    if (this.recv_dy[i] <= dy_abs) {
+                        step_dy = sign_dy * this.send_dy[i];
+                        total_dy_sent_abs += this.recv_dy[i];
+                        dy_abs -= this.recv_dy[i];
                         break;
                     }
                 }
                 if (i < this.send_dy_index) {
-                    i2 = 0;
-                    i4 += k;
-                    k = 0;
+                    step_dy = 0;
+                    total_dy_sent_abs += dy_abs;
+                    dy_abs = 0;
                 }
             } else {
-                i2 = 0;
+                step_dy = 0;
             }
 
 
-            if ((i1 != 0) || (i2 != 0)) {
-                this.listener.serverMove(i1, i2, this.client_x, this.client_y);
+            if ((step_dx != 0) || (step_dy != 0)) {
+                this.listener.serverMove(step_dx, step_dy, this.client_x, this.client_y);
             }
+        }
 
-
-        } while ((j != 0) || (k != 0));
-
-        this.client_dx -= m * i3;
-        this.client_dy -= n * i4;
+        this.client_dx -= sign_dx * total_dx_sent_abs;
+        this.client_dy -= sign_dy * total_dy_sent_abs;
 
         if (!paramBoolean2) {
-            this.server_x += m * i3;
-            this.server_y -= n * i4;
+            this.server_x += sign_dx * total_dx_sent_abs;
+            this.server_y -= sign_dy * total_dy_sent_abs;
             if (this.debugMsgEnabled) {
                 System.out.println("Server:" + this.server_x + "," + this.server_y);
             }
