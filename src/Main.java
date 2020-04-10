@@ -312,6 +312,7 @@ public class Main {
             Container c = jf.getContentPane();
             jf.setBounds(0, 0, 1070,880);
             jf.setVisible(true);
+            jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             c.add(rmc);
             rmc.init();
             rmc.start();
