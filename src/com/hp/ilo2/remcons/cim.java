@@ -17,12 +17,12 @@ public class cim extends telnet implements MouseSyncListener {
     public static final int MOUSE_BUTTON_CENTER = 2;
     public static final int MOUSE_BUTTON_RIGHT = 1;
     private static final int CMD_ENCRYPT = 192;
-    private static final int CMD_MOUSE_MOVE = 208;
-    private static final int CMD_BUTTON_PRESS = 209;
-    private static final int CMD_BUTTON_RELEASE = 210;
-    private static final int CMD_BUTTON_CLICK = 211;
-    private static final int CMD_BYTE = 212;
-    private static final int CMD_SET_MODE = 213;
+    private static final byte CMD_MOUSE_MOVE = (byte) 0xd0;
+    private static final byte CMD_BUTTON_PRESS = (byte) 0xd1;
+    private static final byte CMD_BUTTON_RELEASE = (byte) 0xd2;
+    private static final byte CMD_BUTTON_CLICK = (byte) 0xd3;
+    private static final byte CMD_BYTE = (byte) 0xd4;
+    private static final byte CMD_SET_MODE = (byte) 0xd5;
     private static final char MOUSE_USBABS = '\001';
     private static final char MOUSE_USBREL = '\002';
     private static final int block_width = 16;
@@ -282,6 +282,7 @@ public class cim extends telnet implements MouseSyncListener {
         this.mouse_sync.sync();
     }
 
+    // clientX and clientY are probably just 16 bit
     public void serverMove(int paramInt1, int paramInt2, int clientX, int clientY) {
         if (paramInt1 < -128) {
             paramInt1 = -128;
@@ -302,20 +303,20 @@ public class cim extends telnet implements MouseSyncListener {
             clientX = 3000 * clientX;
             clientY = 3000 * clientY;
         }
-        char c1 = (char) (clientX / 256);
-        char c2 = (char) (clientX % 256);
-        char c3 = (char) (clientY / 256);
-        char c4 = (char) (clientY % 256);
+        byte c1 = (byte) (clientX / 256);
+        byte c2 = (byte) (clientX % 256);
+        byte c3 = (byte) (clientY / 256);
+        byte c4 = (byte) (clientY % 256);
         if (this.mouse_protocol == 0) {
-            transmit("" + TELNET_IAC + CMD_MOUSE_MOVE + (char) paramInt1 + "" + (char) paramInt2);
+            transmit(new byte[] {TELNET_IAC, CMD_MOUSE_MOVE, (byte) paramInt1, (byte) paramInt2});
         } else {
-            transmit("" + TELNET_IAC + CMD_MOUSE_MOVE + (char) paramInt1 + "" + (char) paramInt2 + "" + c1 + "" + c2 + "" + c3 + "" + c4);
+            transmit(new byte[] {TELNET_IAC, CMD_MOUSE_MOVE, (byte) paramInt1, (byte) paramInt2, c1, c2, c3, c4});
         }
     }
 
     public void mouse_mode_change(boolean absolute) {
-        char mode = absolute ? MOUSE_USBABS : MOUSE_USBREL;
-        transmit("" + TELNET_IAC + CMD_SET_MODE + mode);
+        byte mode = (byte) (absolute ? MOUSE_USBABS : MOUSE_USBREL);
+        transmit(new byte[] {TELNET_IAC, CMD_SET_MODE, mode});
     }
 
     public void mouseEntered(MouseEvent event) {
@@ -925,19 +926,19 @@ public class cim extends telnet implements MouseSyncListener {
     }
 
     public void send_mouse_press(int paramInt) {
-        transmit("" + TELNET_IAC + CMD_BUTTON_PRESS + (char) paramInt);
+        transmit(new byte[] {TELNET_IAC, CMD_BUTTON_PRESS, (byte) paramInt});
     }
 
     public void send_mouse_release(int paramInt) {
-        transmit("" + TELNET_IAC + CMD_BUTTON_RELEASE + (char) paramInt);
+        transmit(new byte[] {TELNET_IAC, CMD_BUTTON_RELEASE, (byte) paramInt});
     }
 
     public void send_mouse_click(int paramInt1, int paramInt2) {
-        transmit("" + TELNET_IAC + CMD_BUTTON_CLICK + (char) paramInt1 + "" + (char) paramInt2);
+        transmit(new byte[] {TELNET_IAC, CMD_BUTTON_CLICK, (byte) paramInt1, (byte) paramInt2});
     }
 
     public void send_mouse_byte(int paramInt) {
-        transmit("" + TELNET_IAC + CMD_BYTE + (char) paramInt);
+        transmit(new byte[] {TELNET_IAC, CMD_BYTE, (byte) paramInt});
     }
 
     public void refresh_screen() {
