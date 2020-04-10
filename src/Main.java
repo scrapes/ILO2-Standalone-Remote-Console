@@ -35,9 +35,15 @@ var sessionindex="00000005";
 */
 
 public class Main {
+    private static final String USAGE_TEXT = "Usage: \n" +
+                                             "- ILO2RemCon.jar <Hostname or IP> <Username> <Password>\n" +
+                                             "- ILO2RemCon.jar -c <Path to config.json>";
+
+    private static final String DEFAULT_CONFIG_PATH = "config.json";
+    private static final String COOKIE_FILE = "data.cook";
+
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
 
-    private static final String COOKIE_FILE = "data.cook";
 
     private static String username = "";
     private static String password = "";
@@ -225,21 +231,52 @@ public class Main {
 
 
     public static void main(String[] args) {
+        Optional<String> configPath = Optional.empty();
+
+        switch (args.length) {
+            case 0:
+                // <no args>
+                // try the default config location
+                configPath = Optional.of(DEFAULT_CONFIG_PATH);
+                break;
+            case 2:
+                // -c <path>
+                if (args[0].equals("-c")) {
+                    configPath = Optional.of(args[1]);
+                } else {
+                    System.out.println(USAGE_TEXT);
+                }
+                break;
+            case 3:
+                // <Hostname or IP> <Username> <Password>
+                setHostname(args[0]);
+                username = args[1];
+                password = args[2];
+                break;
+            default:
+                System.out.println(USAGE_TEXT);
+                return;
+        }
+
         SSLUtilities.trustAllHostnames();
         SSLUtilities.trustAllHttpsCertificates();
         CookieHandler.setDefault(cookieManager);
-        try {
-            String config = new String(Files.readAllBytes(Paths.get("config.json")));
-            System.out.println("Config JSON:" + config);
-            Json js = Json.read(config);
-            username = js.at("Username").asString();
-            password = js.at("Password").asString();
-            setHostname(js.at("Hostname").asString());
-        } catch (Exception e) {
-            System.err.println("Error in parsing config file!");
-            e.printStackTrace();
-            return;
+
+        if (configPath.isPresent()) {
+            try {
+                String config = new String(Files.readAllBytes(Paths.get(configPath.get())));
+                System.out.println("Config JSON:" + config);
+                Json js = Json.read(config);
+                username = js.at("Username").asString();
+                password = js.at("Password").asString();
+                setHostname(js.at("Hostname").asString());
+            } catch (Exception e) {
+                System.err.println("Error in parsing config file!");
+                e.printStackTrace();
+                return;
+            }
         }
+
         try {
             try (BufferedReader br = new BufferedReader(new FileReader("data.cook"))) {
                 System.out.println("Found datastore");
