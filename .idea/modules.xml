@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ILO2RemCon.iml" filepath="$PROJECT_DIR$/ILO2RemCon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ILO2RemCon.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ILO2RemCon.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ILO2RemCon.test.iml" filepath="$PROJECT_DIR$/.idea/modules/ILO2RemCon.test.iml" />
     </modules>
   </component>
 </project>

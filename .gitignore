@@ -21,6 +21,12 @@
 # IntelliJ
 out/
 
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
 # Project specific
 data.cook
 config.properties
