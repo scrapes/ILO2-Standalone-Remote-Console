@@ -11,11 +11,9 @@ import java.io.*;
 import java.net.*;
 import java.security.Security;
 import java.util.*;
+import java.util.List;
 
 import com.hp.ilo2.remcons.remcons;
-import sun.misc.BASE64Encoder;
-
-import java.util.List;
 
 /*
 
@@ -112,9 +110,15 @@ public class Main {
         con.setRequestProperty("Accept-Language", "de-DE");
         //Cookie:
         con.setDoOutput(true);
-        BASE64Encoder enc = new BASE64Encoder(); //Authenticate
 
-        con.setRequestProperty("Cookie", "hp-iLO-Login=" + sessionIndex + ":" + enc.encode(username.getBytes()) + ":" + enc.encode(password.getBytes()) + ":" + sessionKey);
+        Base64.Encoder enc2 = Base64.getMimeEncoder(); //Authenticate
+        String cookieVal = String.format("hp-iLO-Login=%s:%s:%s:%s",
+                sessionIndex,
+                enc2.encodeToString(username.getBytes()),
+                enc2.encodeToString(password.getBytes()),
+                sessionKey
+        );
+        con.setRequestProperty("Cookie", cookieVal);
 
 
         BufferedReader in = new BufferedReader(
