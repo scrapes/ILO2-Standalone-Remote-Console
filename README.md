@@ -1,7 +1,7 @@
 # ILO2RemoteConsole
 ILO2 Java Remote console as Standalone version
 
-Tested with Java 8
+Tested with Java 8 and Java 11. Hangs for an unknown reason on Java 15.
 
 # Usage
 
