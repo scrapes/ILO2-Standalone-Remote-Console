@@ -9,13 +9,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.Security;
 import java.util.*;
 
 import com.hp.ilo2.remcons.remcons;
-import mjson.Json;
 import sun.misc.BASE64Encoder;
 
 import java.util.List;
@@ -37,9 +34,9 @@ var sessionindex="00000005";
 public class Main {
     private static final String USAGE_TEXT = "Usage: \n" +
                                              "- ILO2RemCon.jar <Hostname or IP> <Username> <Password>\n" +
-                                             "- ILO2RemCon.jar -c <Path to config.json>";
+                                             "- ILO2RemCon.jar -c <Path to config.properties>";
 
-    private static final String DEFAULT_CONFIG_PATH = "config.json";
+    private static final String DEFAULT_CONFIG_PATH = "config.properties";
     private static final String COOKIE_FILE = "data.cook";
 
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko";
@@ -263,15 +260,15 @@ public class Main {
         CookieHandler.setDefault(cookieManager);
 
         if (configPath.isPresent()) {
-            try {
-                String config = new String(Files.readAllBytes(Paths.get(configPath.get())));
-                System.out.println("Config JSON:" + config);
-                Json js = Json.read(config);
-                username = js.at("Username").asString();
-                password = js.at("Password").asString();
-                setHostname(js.at("Hostname").asString());
+            try (FileInputStream fis = new FileInputStream(configPath.get())) {
+                Properties p = new Properties();
+                p.load(fis);
+
+                setHostname(p.getProperty("hostname"));
+                username = p.getProperty("username");
+                password = p.getProperty("password");
             } catch (Exception e) {
-                System.err.println("Error in parsing config file!");
+                System.err.println("Error in reading/parsing config file!");
                 e.printStackTrace();
                 return;
             }
