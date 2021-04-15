@@ -2,6 +2,7 @@
   <configuration default="false" name="RemoteConsole" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="Main" />
     <module name="ILO2RemCon" />
+    <option name="VM_PARAMETERS" value="-Djava.security.properties=java.security" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
