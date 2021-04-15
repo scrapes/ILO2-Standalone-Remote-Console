@@ -416,6 +416,47 @@ public class cim extends telnet implements MouseSyncListener {
         }
     }
 
+    public synchronized void transmit(byte[] data) {
+        if (this.out == null) {
+            return;
+        }
+        if (data.length != 0) {
+            byte[] arrayOfByte = new byte[data.length];
+
+            int i;
+
+            if (this.encryptionActive) {
+                if (this.sending_encrypt_command) {
+                    arrayOfByte[0] = ((byte) data[0]);
+                    arrayOfByte[1] = ((byte) data[1]);
+                    arrayOfByte[2] = ((byte) ((this.key_index & 0xFF000000) >>> 24));
+                    arrayOfByte[3] = ((byte) ((this.key_index & 0xFF0000) >>> 16));
+                    arrayOfByte[4] = ((byte) ((this.key_index & 0xFF00) >>> 8));
+                    arrayOfByte[5] = ((byte) ((this.key_index & 0xFF) >>> 0));
+
+
+                    for (i = 6; i < data.length; i++) {
+                        arrayOfByte[i] = ((byte) (data[i] ^ this.RC4encrypter.randomValue()));
+                    }
+                    this.sending_encrypt_command = false;
+                } else {
+                    for (i = 0; i < data.length; i++) {
+                        arrayOfByte[i] = ((byte) (data[i] ^ this.RC4encrypter.randomValue()));
+                    }
+
+                }
+            } else {
+                for (i = 0; i < data.length; i++) {
+                    arrayOfByte[i] = ((byte) data[i]);
+                }
+            }
+
+            try {
+                this.out.write(arrayOfByte, 0, arrayOfByte.length);
+            } catch (IOException ignored) {}
+        }
+    }
+
     protected String translate_key(KeyEvent keyEvent) {
         String str = "";
         char i = keyEvent.getKeyChar();
