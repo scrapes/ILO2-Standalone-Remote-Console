@@ -31,8 +31,8 @@ var sessionindex="00000005";
 
 public class Main {
     private static final String USAGE_TEXT = "Usage: \n" +
-                                             "- ILO2RemCon.jar <Hostname or IP> <Username> <Password>\n" +
-                                             "- ILO2RemCon.jar -c <Path to config.properties>";
+            "- ILO2RemCon.jar <Hostname or IP> <Username> <Password>\n" +
+            "- ILO2RemCon.jar -c <Path to config.properties>";
 
     private static final String DEFAULT_CONFIG_PATH = "config.properties";
     private static final String COOKIE_FILE = "data.cook";
@@ -55,7 +55,7 @@ public class Main {
     private static String sessionIndex = "";
     private static String supercookie = "";
 
-    private static CookieManager cookieManager = new CookieManager();
+    private final static CookieManager cookieManager = new CookieManager();
 
 
     private static void Stage1() throws Exception {
@@ -125,7 +125,8 @@ public class Main {
                 new InputStreamReader(con.getInputStream()));
 
         //noinspection StatementWithEmptyBody
-        while (in.readLine() != null) { } // discard
+        while (in.readLine() != null) {
+        } // discard
         in.close();
 
         List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
@@ -139,7 +140,7 @@ public class Main {
     }
 
 
-    private static HashMap<String, String> hmap = new HashMap<>();
+    private final static HashMap<String, String> hmap = new HashMap<>();
 
     private static void Stage3() throws Exception {
         // https://" + hostname + "/drc2fram.htm?restart=1
@@ -158,7 +159,7 @@ public class Main {
         con.setRequestProperty("Referer", loginURL);
         con.setRequestProperty("Host", hostname);
         con.setRequestProperty("Accept-Language", "de-DE");
-        if(supercookie != "") {
+        if (!supercookie.equals("")) {
             con.setRequestProperty("Cookie", supercookie);
         }
 
@@ -288,7 +289,7 @@ public class Main {
                     lastline = line;
                 }
 
-                if(!isValid(lastline)) {
+                if (!isValid(lastline)) {
                     System.out.println("Datastore not valid, requesting Cookie");
                     Stage1();
                     Stage2();
@@ -311,7 +312,7 @@ public class Main {
 
             JFrame jf = new JFrame();
             Container c = jf.getContentPane();
-            jf.setBounds(0, 0, 1070,880);
+            jf.setBounds(0, 0, 1070, 880);
             jf.setVisible(true);
             jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             c.add(rmc);
