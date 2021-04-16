@@ -313,6 +313,7 @@ public class Main {
             JFrame jf = new JFrame();
             Container c = jf.getContentPane();
             jf.setBounds(0, 0, 1070, 880);
+            jf.setTitle(hostname + " - iLO2");
             jf.setVisible(true);
             jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             c.add(rmc);
