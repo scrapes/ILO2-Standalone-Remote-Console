@@ -23,8 +23,7 @@ dependencies {
 }
 
 application {
-    // Define the main class for the application. Used for `./gradlew run` only I think. Wish this set it in the manifest.mf
-    mainClassName = 'Main'
+    mainClass.set('Main')
     applicationDefaultJvmArgs = ['-Djava.security.properties=java.security']
 }
 
