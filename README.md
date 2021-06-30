@@ -14,11 +14,11 @@ You can either pass host, username and password as arguments:
 
 ```java -jar ILO2RemCon.jar -Djava.security.properties=java.security <Hostname> <Username> <Password>```
 
-Or you can use a config file (for an example, see `config.json_template`):
+Or you can use a config file (for an example, see `config_template.properties`):
 
-``java -jar ILO2RemCon.jar -Djava.security.properties=java.security -c <Path to config.json>``
+``java -jar ILO2RemCon.jar -Djava.security.properties=java.security -c <Path to config.properties>``
 
-Running the Application without arguments will try using a `config.json` in the current working directory.
+Running the Application without arguments will try using a `config.properties` in the current working directory.
 
 Because even on the latest firmware (2.33 as of 2021-04-16),
 due to hardware limitations, iLO2 does not support modern TLS (and ciphers).
