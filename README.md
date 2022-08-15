@@ -12,11 +12,11 @@ so a custom security file has to be passed to Java.
 
 You can either pass host, username and password as arguments:
 
-```java -jar ILO2RemCon.jar -Djava.security.properties=java.security <Hostname> <Username> <Password>```
+```java -Djava.security.properties=java.security -jar ILO2RemCon.jar <Hostname> <Username> <Password>```
 
 Or you can use a config file (for an example, see `config_template.properties`):
 
-``java -jar ILO2RemCon.jar -Djava.security.properties=java.security -c <Path to config.properties>``
+``java -Djava.security.properties=java.security -jar ILO2RemCon.jar -c <Path to config.properties>``
 
 Running the Application without arguments will try using a `config.properties` in the current working directory.
 
