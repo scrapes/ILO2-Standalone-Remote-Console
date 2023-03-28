@@ -34,3 +34,8 @@ jar {
         )
     }
 }
+
+// fix compilation as long as literals are not properly cleaned up in source code (LocaleTranslator especially)
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
